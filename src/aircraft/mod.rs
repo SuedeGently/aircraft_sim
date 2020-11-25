@@ -34,6 +34,10 @@ impl Aircraft {
     fn add_passenger(&mut self, p: Person) {
         self.passengers.push(p);
     }
+
+    pub fn get_size(&self) -> (u16, u16) {
+        self.size
+    }
 }
 
 #[cfg(test)]
@@ -71,10 +75,17 @@ mod tests {
 
     #[test]
     fn add_passenger() {
+        println!("Testing add_passenger()");
         let mut aircraft = Aircraft::new(6, 9);
         let passenger = Person::new("Dave");
         aircraft.add_passenger(passenger);
         assert_eq!(aircraft.passengers.get(0).unwrap().get_name(), "Dave");
         assert_eq!(aircraft.passengers.get(0).unwrap().get_seat(), None);
+    }
+
+    #[test]
+    fn get_size() {
+        let aircraft = Aircraft::new(5, 6);
+        assert_eq!(aircraft.get_size(), (5, 6));
     }
 }
