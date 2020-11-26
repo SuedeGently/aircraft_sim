@@ -35,6 +35,23 @@ impl Aircraft {
         self.passengers.push(p);
     }
 
+    fn update(&mut self) {
+        for i in 0..self.size.0 as usize {
+            for j in 0..self.size.1 as usize{
+                if self.layout[i][j]
+                    .get_variant() == Variant::Entrance {
+                        if self.layout[i][j].get_occupier().is_some() {
+                            // TODO: React to person
+                        }
+                        if self.passengers.len() > 0 {
+                            self.layout[i][j]
+                                .occupy(self.passengers.pop().unwrap());
+                        }
+                }
+            }
+        }
+    }
+
     pub fn get_size(&self) -> (u16, u16) {
         self.size
     }
@@ -87,5 +104,29 @@ mod tests {
     fn get_size() {
         let aircraft = Aircraft::new(5, 6);
         assert_eq!(aircraft.get_size(), (5, 6));
+    }
+
+    #[test]
+    fn update() {
+        let mut aircraft = Aircraft::new(10, 10);
+        let mut passenger = Person::new("Dave");
+
+        aircraft.add_passenger(passenger);
+        assert_eq!(aircraft.passengers.len(), 1);
+
+        aircraft.layout[0][0] = Tile::entrance();
+        aircraft.update();
+        assert_eq!(aircraft.passengers.len(), 0);
+
+        match aircraft.layout[0][0].get_occupier() {
+            Some(_) => println!("Success"),
+            None => panic!("There should be a passenger here"),
+        }
+
+        aircraft.update();
+        match aircraft.layout[0][0].get_occupier() {
+            Some(_) => panic!("There should be no passenger here"),
+            None => println!("Success"),
+        }
     }
 }
