@@ -99,6 +99,10 @@ impl SimpleTile {
             occupied: false,
         }
     }
+
+    pub fn get_variant(&self) -> Variant {
+        return self.variant;
+    }
 }
 
 #[cfg(test)]

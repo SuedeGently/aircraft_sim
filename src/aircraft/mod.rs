@@ -38,22 +38,25 @@ impl Aircraft {
     fn update(&mut self) {
         for i in 0..self.size.0 as usize {
             for j in 0..self.size.1 as usize{
-                if self.layout[i][j]
-                    .get_variant() == Variant::Entrance {
+                if 
+                    self.layout[i][j].get_variant() == Variant::Entrance ||
+                    self.layout[i][j].get_variant() == Variant::Aisle {
                         if self.layout[i][j].get_occupier().is_some() {
                             let mut surroundings = [SimpleTile::empty(); 9];
                             let mut pos: usize = 0;
-                            for k in (i as i32 - 1)..(i as i32 + 1) {
-                                for l in (j as i32 - 1)..(j as i32 + 1) {
+                            for k in (i as i32 - 1)..(i as i32 + 2) {
+                                for l in (j as i32 - 1)..(j as i32 + 2) {
                                     if k >= 0 && k < self.size.0 as i32 &&
                                        l >= 0 && l < self.size.1 as i32 {
-                                        surroundings[pos] = SimpleTile::new(&self.layout[i][j]);
+                                        surroundings[pos] = SimpleTile::new(&self.layout[k as usize][l as usize]);
+                                        println!("Tile {},{} = {:?}", k, l, surroundings[pos].get_variant());
                                     }
                                     pos += 1;
                                 }
                             }
                             let behaviour = self.layout[i][j].get_occupier().unwrap().update((i as u16,j as u16), surroundings);
                             if behaviour != Behaviour::Wait {
+                                println!("Passenger moved: {:?}", behaviour);
                                 let person = self.layout[i][j].free();
                                 match behaviour {
                                     Behaviour::Wait => println!("Wait"),
@@ -61,11 +64,13 @@ impl Aircraft {
                                     Behaviour::Move_South => self.layout[i][j + 1].occupy(person.unwrap()),
                                     Behaviour::Move_East => self.layout[i + 1][j].occupy(person.unwrap()),
                                     Behaviour::Move_West => self.layout[i - 1][j].occupy(person.unwrap()),
-                                    _ => panic!("fuck"),
+                                    _ => panic!("Impossible movement"),
                                 }
+                            } else {
+                                println!("Passenger waited");
                             }
                         }
-                        if self.passengers.len() > 0 {
+                        if self.layout[i][j].get_variant() == Variant::Entrance && self.passengers.len() > 0 {
                             self.layout[i][j]
                                 .occupy(self.passengers.pop().unwrap());
                         }
@@ -134,16 +139,44 @@ mod tests {
         let mut passenger = Person::new("Dave");
         passenger.target_seat(1,1);
 
+        println!("Adding passenger");
         aircraft.add_passenger(passenger);
         assert_eq!(aircraft.passengers.len(), 1, "Unwanted passenger at initialisation");
 
-        aircraft.layout[0][0] = Tile::entrance();
+        println!("Adding entrance and updating");
+        aircraft.layout[2][2] = Tile::entrance();
+        // aircraft.layout[2][3] = Tile::aisle();
         aircraft.update();
         assert_eq!(aircraft.passengers.len(), 0, "Passenger was not removed from passengers array");
-        assert!(aircraft.layout[0][0].is_occupied(), "Passenger was not added to entrance tile");
+        assert!(aircraft.layout[2][2].is_occupied(), "Passenger was not added to entrance tile");
 
+        println!("Updating");
         aircraft.update();
+        println!("Updating");
         aircraft.update();
-        assert_eq!(aircraft.layout[0][0].is_occupied(), false, "Passenger did not move from entrance");
+        assert_eq!(aircraft.layout[2][2].is_occupied(), false, "Passenger did not move from entrance");
+        assert!(aircraft.layout[1][1].is_occupied(), "Passenger did not make it to target seat");
+
+        println!("Updating once too much");
+        aircraft.update();
+        assert!(aircraft.layout[1][1].is_occupied(), "Passenger shouldn't have moved from their seat");
+    }
+
+    #[test]
+    fn impassable_terrain() {
+        let mut aircraft = Aircraft::new(3,3);
+        let mut passenger = Person::new("Dave");
+        passenger.target_seat(2,2);
+        aircraft.layout[0][0] = Tile::entrance();
+        for coords in &[(0, 1), (1, 1), (1, 0)] {
+            aircraft.layout[coords.0][coords.1] = Tile::none();
+        }
+        aircraft.add_passenger(passenger);
+
+        for i in 0..100 {
+            aircraft.update();
+        }
+
+        assert_eq!(aircraft.layout[2][2].is_occupied(), false, "Passenger made it to seat despite obstacles");
     }
 }
