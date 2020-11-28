@@ -1,8 +1,8 @@
 mod tile;
 mod person;
 
-use tile::{Tile, Variant};
-use person::Person;
+use tile::{Tile, Variant, SimpleTile};
+use person::{Person, Behaviour};
 
 pub struct Aircraft {
     size: (u16, u16),
@@ -41,7 +41,29 @@ impl Aircraft {
                 if self.layout[i][j]
                     .get_variant() == Variant::Entrance {
                         if self.layout[i][j].get_occupier().is_some() {
-                            // TODO: React to person
+                            let mut surroundings = [SimpleTile::empty(); 9];
+                            let mut pos: usize = 0;
+                            for k in (i as i32 - 1)..(i as i32 + 1) {
+                                for l in (j as i32 - 1)..(j as i32 + 1) {
+                                    if k >= 0 && k < self.size.0 as i32 &&
+                                       l >= 0 && l < self.size.1 as i32 {
+                                        surroundings[pos] = SimpleTile::new(&self.layout[i][j]);
+                                    }
+                                    pos += 1;
+                                }
+                            }
+                            let behaviour = self.layout[i][j].get_occupier().unwrap().update((i as u16,j as u16), surroundings);
+                            if behaviour != Behaviour::Wait {
+                                let person = self.layout[i][j].free();
+                                match behaviour {
+                                    Behaviour::Wait => println!("Wait"),
+                                    Behaviour::Move_North => self.layout[i][j - 1].occupy(person.unwrap()),
+                                    Behaviour::Move_South => self.layout[i][j + 1].occupy(person.unwrap()),
+                                    Behaviour::Move_East => self.layout[i + 1][j].occupy(person.unwrap()),
+                                    Behaviour::Move_West => self.layout[i - 1][j].occupy(person.unwrap()),
+                                    _ => panic!("fuck"),
+                                }
+                            }
                         }
                         if self.passengers.len() > 0 {
                             self.layout[i][j]
@@ -110,23 +132,18 @@ mod tests {
     fn update() {
         let mut aircraft = Aircraft::new(10, 10);
         let mut passenger = Person::new("Dave");
+        passenger.target_seat(1,1);
 
         aircraft.add_passenger(passenger);
-        assert_eq!(aircraft.passengers.len(), 1);
+        assert_eq!(aircraft.passengers.len(), 1, "Unwanted passenger at initialisation");
 
         aircraft.layout[0][0] = Tile::entrance();
         aircraft.update();
-        assert_eq!(aircraft.passengers.len(), 0);
-
-        match aircraft.layout[0][0].get_occupier() {
-            Some(_) => println!("Success"),
-            None => panic!("There should be a passenger here"),
-        }
+        assert_eq!(aircraft.passengers.len(), 0, "Passenger was not removed from passengers array");
+        assert!(aircraft.layout[0][0].is_occupied(), "Passenger was not added to entrance tile");
 
         aircraft.update();
-        match aircraft.layout[0][0].get_occupier() {
-            Some(_) => panic!("There should be no passenger here"),
-            None => println!("Success"),
-        }
+        aircraft.update();
+        assert_eq!(aircraft.layout[0][0].is_occupied(), false, "Passenger did not move from entrance");
     }
 }
