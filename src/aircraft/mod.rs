@@ -179,4 +179,23 @@ mod tests {
 
         assert_eq!(aircraft.layout[2][2].is_occupied(), false, "Passenger made it to seat despite obstacles");
     }
+
+    #[test]
+    fn aisle_ignoring() {
+        let mut aircraft = Aircraft::new(3,3);
+        let mut passenger = Person::new("Dave");
+        passenger.target_seat(2,2);
+        aircraft.layout[1][0] = Tile::entrance();
+        for i in 0..3 {
+            aircraft.layout[0][i] = Tile::seat();
+            aircraft.layout[2][i] = Tile::seat();
+        }
+        aircraft.add_passenger(passenger);
+
+        for i in 0..5 {
+            println!("Updating..");
+            aircraft.update();
+        }
+        assert!(aircraft.layout[2][0].is_occupied(), "Passenger did not make it to seat");
+    }
 }
