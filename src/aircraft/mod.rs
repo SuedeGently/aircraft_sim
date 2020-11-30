@@ -198,4 +198,29 @@ mod tests {
         }
         assert!(aircraft.layout[2][0].is_occupied(), "Passenger did not make it to seat");
     }
+
+    #[test]
+    fn advanced_aisle_ignoring() {
+        let mut aircraft = Aircraft::new(3,3);
+        aircraft.layout[1][2] = Tile::entrance();
+        for i in 0..3 {
+            for j in &[0, 2] {
+                let mut passenger = Person::new("DEFAULT");
+                passenger.target_seat(*j, i);
+                aircraft.layout[*j as usize][i as usize] = Tile::seat();
+                aircraft.add_passenger(passenger);
+            }
+        }
+        
+        for _ in 0..100 {
+            println!("Updating..");
+            aircraft.update();
+        }
+
+        for i in 0..3 {
+            for j in &[0, 2] {
+                assert!(aircraft.layout[*j][i].is_occupied(), "Seat {},{} was not occupied", *j, i);
+            }
+        }
+    }
 }
