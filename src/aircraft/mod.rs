@@ -35,6 +35,30 @@ impl Aircraft {
         self.passengers.push(p);
     }
 
+    fn ascii_render(&self) {
+        print!("   ");
+        for i in 0..self.size.0 {
+            print!("{}", i);
+        }
+        print!("\n");
+        for j in 0..self.size.1 as usize {
+            print!("{:>3}", j);
+            for i in 0..self.size.0 as usize {
+                if self.layout[i][j].is_occupied() {
+                    print!("@");
+                } else {
+                    print!("{}", match self.layout[i][j].get_variant() {
+                        Variant::Aisle => "*",
+                        Variant::Seat => "#",
+                        Variant::Entrance => "*",
+                        Variant::None => "?",
+                    });
+                }
+            }
+            print!("\n");
+        }
+    }
+
     fn update(&mut self) {
         for i in 0..self.size.0 as usize {
             for j in 0..self.size.1 as usize{
@@ -44,8 +68,8 @@ impl Aircraft {
                         if self.layout[i][j].get_occupier().is_some() {
                             let mut surroundings = [SimpleTile::empty(); 9];
                             let mut pos: usize = 0;
-                            for k in (i as i32 - 1)..(i as i32 + 2) {
-                                for l in (j as i32 - 1)..(j as i32 + 2) {
+                            for l in (j as i32 - 1)..(j as i32 + 2) {
+                                for k in (i as i32 - 1)..(i as i32 + 2) {
                                     if k >= 0 && k < self.size.0 as i32 &&
                                        l >= 0 && l < self.size.1 as i32 {
                                         surroundings[pos] = SimpleTile::new(&self.layout[k as usize][l as usize]);
@@ -184,8 +208,8 @@ mod tests {
     fn aisle_ignoring() {
         let mut aircraft = Aircraft::new(3,3);
         let mut passenger = Person::new("Dave");
-        passenger.target_seat(2,2);
-        aircraft.layout[1][0] = Tile::entrance();
+        passenger.target_seat(2, 0);
+        aircraft.layout[1][2] = Tile::entrance();
         for i in 0..3 {
             aircraft.layout[0][i] = Tile::seat();
             aircraft.layout[2][i] = Tile::seat();
@@ -211,9 +235,13 @@ mod tests {
                 aircraft.add_passenger(passenger);
             }
         }
+        // let mut passenger = Person::new("DAVE");
+        // passenger.target_seat(2, 0);
+        // aircraft.add_passenger(passenger);
         
         for _ in 0..100 {
-            println!("Updating..");
+            aircraft.ascii_render();
+            println!("========================");
             aircraft.update();
         }
 
