@@ -30,21 +30,50 @@ impl Person {
     pub fn update(&self, pos: (u16, u16), grid: [SimpleTile; 9]) -> Behaviour {
         let mut current_move = (Behaviour::Wait, 1000.0);
         let (pos_x, pos_y) = (pos.0 as f32, pos.1 as f32);
-        if grid[4].get_variant() == Variant::Aisle || grid[4].get_variant() == Variant::Entrance {
-            for coords in &[(1.0, 1.0, Behaviour::Wait),(0.0,1.0, Behaviour::Move_West), (1.0,0.0, Behaviour::Move_North), (1.0,2.0, Behaviour::Move_South), (2.0,1.0, Behaviour::Move_East)] {
+        let current_tile = grid[4].get_variant();
+        if current_tile == Variant::Aisle || current_tile == Variant::Entrance {
+            for coords in &[
+                (1.0, 1.0, Behaviour::Wait),
+                (0.0, 1.0, Behaviour::Move_West),
+                (1.0, 0.0, Behaviour::Move_North),
+                (1.0, 2.0, Behaviour::Move_South),
+                (2.0, 1.0, Behaviour::Move_East)] {
+                
                 let (dest_x, dest_y) = (pos_x + ((-1.0 + coords.0)), (pos_y + (-1.0 + coords.1)));
+                
                 if let mut target_seat = self.seat.unwrap() {
                     let target_seat = (target_seat.0 as f32, target_seat.1 as f32);
+
                     println!("Target seat: {},{}", target_seat.0, target_seat.1);
-                    let new_distance = ((target_seat.0 - dest_x).powf(2.0) + (target_seat.1 - dest_y).powf(2.0)).ceil();
+
+                    let new_distance = ((target_seat.0 - dest_x).abs() + (target_seat.1 - dest_y).abs());
+
                     if new_distance < current_move.1 {
-                        current_move = ((coords.2), new_distance);
-                        println!("NEW MOVE: {:?} x {}", coords.2, new_distance);
+                        if grid[(coords.1 * 3.0 + coords.0) as usize].get_variant() != Variant::Seat || dest_y == target_seat.1 {
+                            // TODO: Make maths in this if less risky   
+                            current_move = ((coords.2), new_distance);
+                            println!("NEW MOVE: {:?} x {} -> {:?}", coords.2, new_distance, grid[(coords.1 * 3.0 + coords.0) as usize].get_variant());
+                            println!("That was at surroundings[{}]", (coords.1 * 3.0 + coords.0) as usize);
+                        } else {
+                            println!("REJECTED: {:?} x {} -> {:?}", coords.2, new_distance, grid[(coords.1 * 3.0 + coords.0) as usize].get_variant());
+                            println!("That was at surroundings[{}]", (coords.1 * 3.0 + coords.0) as usize);
+                        }
+                    } else {
+                        println!("REJECTED: {:?} x {} -> {:?}", coords.2, new_distance, grid[(coords.1 * 3.0 + coords.0) as usize].get_variant());
+                        println!("That was at surroundings[{}]", (coords.1 * 3.0 + coords.0) as usize);
                     }
                 } else {
                     // No target seat
                 }
                 println!("Checked {}, {}", dest_x, dest_y);
+            }
+        } else if current_tile == Variant::Seat {
+            for coords in &[
+                (1.0, 1.0, Behaviour::Wait),
+                (0.0, 1.0, Behaviour::Move_West),
+                (2.0, 1.0, Behaviour::Move_East),
+            ] {
+                // React
             }
         }
         
