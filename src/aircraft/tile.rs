@@ -1,5 +1,5 @@
 use std::fmt;
-use super::person::Person;
+use super::Person;
 
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub enum Variant {

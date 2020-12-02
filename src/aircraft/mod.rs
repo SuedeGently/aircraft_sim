@@ -1,8 +1,8 @@
-mod tile;
 mod person;
+mod tile;
 
-use tile::{Tile, Variant, SimpleTile};
 use person::{Person, Behaviour};
+use tile::{Tile, Variant, SimpleTile};
 
 pub struct Aircraft {
     size: (u16, u16),
@@ -35,7 +35,26 @@ impl Aircraft {
         self.passengers.push(p);
     }
 
-    fn update(&mut self) {
+    pub fn set_tile(&mut self, x: u16, y: u16, v: &str) {
+        self.layout[x as usize][y as usize] = match v {
+            "aisle" => Tile::aisle(),
+            "seat" => Tile::seat(),
+            "entrance" => Tile::entrance(),
+            _ => Tile::none(),
+        };
+    }
+
+    pub fn easy_add_passenger(&mut self, name: &str, seat: Option<(u16, u16)>) {
+        let mut passenger = Person::new(name);
+        if seat.is_some() {
+            let (seat_x, seat_y) = seat.unwrap();
+            passenger.target_seat(seat_x, seat_y);
+        }
+
+        self.passengers.push(passenger);
+    }
+
+    pub fn update(&mut self) {
         for i in 0..self.size.0 as usize {
             for j in 0..self.size.1 as usize{
                 if 
@@ -81,6 +100,18 @@ impl Aircraft {
 
     pub fn get_size(&self) -> (u16, u16) {
         self.size
+    }
+
+    pub fn get_tile(&self, x: u16, y: u16) -> &Tile {
+        &self.layout[x as usize][y as usize]
+    }
+
+    pub fn get_colour(&self, x: u16, y: u16) -> &str {
+        match self.layout[x as usize][y as usize].get_variant() {
+            Variant::Aisle => "grey",
+            Variant::Seat => "red",
+            _ => "white",
+        }
     }
 }
 

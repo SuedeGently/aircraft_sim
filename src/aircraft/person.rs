@@ -1,5 +1,3 @@
-// mod tile;
-
 use std::fmt;
 use super::tile::{Variant, Tile, SimpleTile};
 
