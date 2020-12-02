@@ -42,10 +42,13 @@ fn main() {
     let mut aircraft = Aircraft::new(AIRCRAFT_SIZE, AIRCRAFT_SIZE);
     for i in 0..AIRCRAFT_SIZE {
         aircraft.set_tile(0, i, "seat");
+        aircraft.set_tile(1, i, "seat");
+        aircraft.set_tile(3, i, "seat");
+        aircraft.set_tile(4, i, "seat");
+        aircraft.easy_add_passenger("Dave", Some((0, i)));
+        aircraft.easy_add_passenger("Dave", Some((2, i)));
     }
-    aircraft.set_tile(1, AIRCRAFT_SIZE - 1, "entrance");
-    aircraft.easy_add_passenger("Dave", Some((0, 0)));
-    aircraft.easy_add_passenger("Dave", Some((0, 1)));
+    aircraft.set_tile(2, AIRCRAFT_SIZE - 1, "entrance");
     
     let mut gl = GlGraphics::new(opengl);
     while let Some(e) = events.next(&mut window) {
