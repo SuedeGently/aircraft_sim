@@ -16,9 +16,9 @@ use std::io::prelude::*;
 
 type Colour = [f32; 4];
 
-const WINDOW_SIZE: i32 = 160;
+const WINDOW_SIZE: i32 = 320;
 const PIXEL_SIZE: f64 = 32.0;
-const AIRCRAFT_SIZE: u16 = 5;
+const AIRCRAFT_SIZE: u16 = 10;
 
 const RED: Colour = [1.0, 0.0, 0.0, 1.0];
 const GREEN: Colour = [0.0, 1.0, 0.0, 1.0];
@@ -43,10 +43,11 @@ fn main() {
     for i in 0..AIRCRAFT_SIZE {
         aircraft.set_tile(0, i, "seat");
         aircraft.set_tile(1, i, "seat");
-        aircraft.set_tile(3, i, "seat");
-        aircraft.set_tile(4, i, "seat");
-        aircraft.easy_add_passenger("Dave", Some((0, i)));
-        aircraft.easy_add_passenger("Dave", Some((2, i)));
+        aircraft.set_tile(AIRCRAFT_SIZE - 2, i, "seat");
+        aircraft.set_tile(AIRCRAFT_SIZE - 1, i, "seat");
+
+        aircraft.easy_add_passenger("DAVE", Some((0, i)));
+        aircraft.easy_add_passenger("DAVE", Some((AIRCRAFT_SIZE - 1, i)));
     }
     aircraft.set_tile(2, AIRCRAFT_SIZE - 1, "entrance");
     
