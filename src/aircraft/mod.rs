@@ -63,8 +63,10 @@ impl Aircraft {
         for i in 0..self.size.0 as usize {
             for j in 0..self.size.1 as usize{
                 if 
+                    ! self.layout[i][j].has_updated() && (
                     self.layout[i][j].get_variant() == Variant::Entrance ||
-                    self.layout[i][j].get_variant() == Variant::Aisle {
+                    self.layout[i][j].get_variant() == Variant::Aisle ||
+                    self.layout[i][j].get_variant() == Variant::Seat ) {
                         if self.layout[i][j].get_occupier().is_some() {
                             let mut surroundings = [SimpleTile::empty(); 9];
                             let mut pos: usize = 0;
@@ -101,10 +103,20 @@ impl Aircraft {
                 }
             }
         }
+        self.reset();
+        println!("END_OF_UPDATE_____________________________");
+    }
+
+    pub fn reset(&mut self) {
+        for i in 0..self.size.0 as usize {
+            for j in 0..self.size.1 as usize {
+                self.layout[i][j].set_updated(false);
+            }
+        }
     }
 
     pub fn get_size(&self) -> (u16, u16) {
-        self.size
+        (self.size.0, self.size.1)
     }
 }
 
