@@ -73,6 +73,33 @@ impl Person {
                 (0.0, 1.0, Behaviour::Move_West),
                 (2.0, 1.0, Behaviour::Move_East),
             ] {
+                let (dest_x, dest_y) = (pos_x + ((-1.0 + coords.0)), (pos_y + (-1.0 + coords.1)));
+
+                if let mut target_seat = self.seat.unwrap() {
+                    let target_seat = (target_seat.0 as f32, target_seat.1 as f32);
+
+                    println!("Target seat: {},{}", target_seat.0, target_seat.1);
+
+                    let new_distance = ((target_seat.0 - dest_x).abs() + (target_seat.1 - dest_y).abs());
+
+                    if new_distance < current_move.1 {
+                        if grid[(coords.1 * 3.0 + coords.0) as usize].get_variant() != Variant::Seat || dest_y == target_seat.1 {
+                            // TODO: Make maths in this if less risky   
+                            current_move = ((coords.2), new_distance);
+                            println!("NEW MOVE: {:?} x {} -> {:?}", coords.2, new_distance, grid[(coords.1 * 3.0 + coords.0) as usize].get_variant());
+                            println!("That was at surroundings[{}]", (coords.1 * 3.0 + coords.0) as usize);
+                        } else {
+                            println!("REJECTED: {:?} x {} -> {:?}", coords.2, new_distance, grid[(coords.1 * 3.0 + coords.0) as usize].get_variant());
+                            println!("That was at surroundings[{}]", (coords.1 * 3.0 + coords.0) as usize);
+                        }
+                    } else {
+                        println!("REJECTED: {:?} x {} -> {:?}", coords.2, new_distance, grid[(coords.1 * 3.0 + coords.0) as usize].get_variant());
+                        println!("That was at surroundings[{}]", (coords.1 * 3.0 + coords.0) as usize);
+                    }
+                } else {
+                    // No target seat
+                }
+                println!("Checked {}, {}", dest_x, dest_y);
                 // React
             }
         }

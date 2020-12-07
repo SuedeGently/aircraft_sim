@@ -12,6 +12,7 @@ pub enum Variant {
 pub struct Tile {
     variant: Variant,
     occupier: Option<Person>,
+    updated: bool,
 }
 
 impl Tile {
@@ -19,6 +20,7 @@ impl Tile {
         Tile {
             variant: Variant::Aisle,
             occupier: None,
+            updated: false,
         }
     }
 
@@ -26,6 +28,7 @@ impl Tile {
         Tile {
             variant: Variant::Seat,
             occupier: None,
+            updated: false,
         }
     }
 
@@ -33,6 +36,7 @@ impl Tile {
         Tile {
             variant: Variant::Entrance,
             occupier: None,
+            updated: false,
         }
     }
 
@@ -40,11 +44,13 @@ impl Tile {
         Tile {
             variant: Variant::None,
             occupier: None,
+            updated: false,
         }
     }
 
     pub fn occupy(&mut self, p: Person) {
         self.occupier = Some(p);
+        self.updated = true;
     }
 
     pub fn is_occupied(&self) -> bool {
@@ -60,6 +66,14 @@ impl Tile {
 
     pub fn get_occupier(&mut self) -> Option<&Person> {
         return self.occupier.as_ref();
+    }
+
+    pub fn has_updated(&self) -> bool {
+        self.updated
+    }
+
+    pub fn set_updated(&mut self, t: bool) {
+        self.updated = t;
     }
 
     pub fn free(&mut self) -> Option<Person> {
