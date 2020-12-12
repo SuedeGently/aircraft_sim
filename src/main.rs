@@ -1,4 +1,5 @@
 mod aircraft;
+mod config;
 
 use aircraft::Aircraft;
 
