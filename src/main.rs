@@ -51,9 +51,9 @@ fn main() {
         }
     }
 
-    let passenger_list = [(0,0), (1,0), (2,0), (3,0), (0,1), (1,1), (2,1), (3,1), (0,2), (1,2), (2,2), (3,2)];
-    for i in 1..passenger_list.len() + 1 {
-        aircraft.easy_add_passenger("DEFAULT", Some(passenger_list[passenger_list.len() - i]));
+    let passenger_list = config::read_passengers(Path::new("./config/debug.csv"));
+    for i in passenger_list.iter() {
+        aircraft.easy_add_passenger(&i[0], Some((i[1].parse().unwrap(), i[2].parse().unwrap())));
     }
 
     aircraft.set_tile(AIRCRAFT_SIZE / 2, AIRCRAFT_SIZE - 1, "entrance");
