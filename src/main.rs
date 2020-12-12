@@ -1,10 +1,12 @@
 mod aircraft;
 mod config;
 
+use std::path::Path;
+
 use aircraft::Aircraft;
 
 fn main() {
-    println!("Nothing happened!");
+    let passenger_list = config::read_passengers(Path::new("./config/test.csv"));
 }
 
 #[cfg(test)]

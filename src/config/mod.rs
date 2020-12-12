@@ -1,7 +1,7 @@
 use std::fs::File;
 use std::path::Path;
 
-fn read_csv(path: &Path) -> Vec<[String; 3]> {
+pub fn read_passengers(path: &Path) -> Vec<[String; 3]> {
     let mut persons = Vec::<[String; 3]>::new();
     let file = File::open(path).expect("Invalid file path");
     let mut rdr = csv::Reader::from_reader(file);
@@ -22,8 +22,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn read() {
-        let persons = read_csv(Path::new("./config/test.csv"));
+    fn test_read_passengers() {
+        let persons = read_passengers(Path::new("./config/test.csv"));
 
         assert_eq!(persons.len(), 2, "Incorrect number of records");
 
