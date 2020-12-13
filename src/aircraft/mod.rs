@@ -79,16 +79,34 @@ impl Aircraft {
                     self.layout[i][j].get_variant() == Variant::Aisle ||
                     self.layout[i][j].get_variant() == Variant::Seat ) {
                         if self.layout[i][j].get_occupier().is_some() {
-                            println!("Copying layout");
-                            let simplified_layout = self.copy_layout();
-                            println!("Copied layout");
+                            let (pos_x, pos_y) = (i, j);
                             let person = self.layout[i][j].get_occupier().unwrap();
+                            let mut current_move = (Behaviour::Wait, 1000.0);
+                            let target_seat = person.get_seat().unwrap(); // TODO: Deal with lack of target
+                            println!("Target seat: {},{}", target_seat.0, target_seat.1);
 
-                            let behaviour = person.update((i as u16,j as u16), &simplified_layout);
-                            if behaviour != Behaviour::Wait {
-                                println!("Passenger moved: {:?}", behaviour);
+                            for potential_move in &[
+                                (Behaviour::Wait, (0.0, 0.0)),
+                                (Behaviour::Move_North, (0.0, -1.0)),
+                                (Behaviour::Move_South, (0.0, 1.0)),
+                                (Behaviour::Move_East, (1.0, 0.0)),
+                                (Behaviour::Move_West, (-1.0, 0.0)),
+                            ] {
+                                let (dest_x, dest_y) = (pos_x as f32 + (potential_move.1).0, pos_y as f32 + (potential_move.1).1);
+                                let new_distance = ((target_seat.0 as f32 - dest_x as f32).abs() + (target_seat.1 as f32 - dest_y as f32).abs());
+
+                                if new_distance < current_move.1 {
+                                    current_move = (potential_move.0, new_distance);
+                                    println!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
+                                } else {
+                                    println!("REJECTED: {:?} x {}", potential_move.0, new_distance);
+                                }
+                            }
+
+                            if current_move.0 != Behaviour::Wait {
+                                println!("Passenger moved: {:?}", current_move.0);
                                 let person = self.layout[i][j].free();
-                                match behaviour {
+                                match current_move.0 {
                                     Behaviour::Wait => println!("Wait"),
                                     Behaviour::Move_North => self.layout[i][j - 1].occupy(person.unwrap()),
                                     Behaviour::Move_South => self.layout[i][j + 1].occupy(person.unwrap()),
