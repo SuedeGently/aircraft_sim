@@ -21,6 +21,17 @@ impl Aircraft {
         return aircraft;
     }
 
+    fn copy_layout(&self) -> Vec<Vec<SimpleTile>> {
+        let mut copied_layout = Vec::<Vec<SimpleTile>>::new();
+        for j in 0..self.size.0 as usize {
+            copied_layout.push(Vec::<SimpleTile>::new());
+            for i in 0..self.size.1 as usize {
+                copied_layout[j].push(SimpleTile::new(&self.layout[i][j]));
+            }
+        }
+        return copied_layout;
+    }
+
     fn clear(&mut self) {
         self.layout = Vec::<Vec<Tile>>::new();
         for i in 0..self.size.0 {
@@ -68,19 +79,12 @@ impl Aircraft {
                     self.layout[i][j].get_variant() == Variant::Aisle ||
                     self.layout[i][j].get_variant() == Variant::Seat ) {
                         if self.layout[i][j].get_occupier().is_some() {
-                            let mut surroundings = [SimpleTile::empty(); 9];
-                            let mut pos: usize = 0;
-                            for l in (j as i32 - 1)..(j as i32 + 2) {
-                                for k in (i as i32 - 1)..(i as i32 + 2) {
-                                    if k >= 0 && k < self.size.0 as i32 &&
-                                       l >= 0 && l < self.size.1 as i32 {
-                                        surroundings[pos] = SimpleTile::new(&self.layout[k as usize][l as usize]);
-                                        println!("Tile {},{} = {:?}", k, l, surroundings[pos].get_variant());
-                                    }
-                                    pos += 1;
-                                }
-                            }
-                            let behaviour = self.layout[i][j].get_occupier().unwrap().update((i as u16,j as u16), surroundings);
+                            println!("Copying layout");
+                            let simplified_layout = self.copy_layout();
+                            println!("Copied layout");
+                            let person = self.layout[i][j].get_occupier().unwrap();
+
+                            let behaviour = person.update((i as u16,j as u16), &simplified_layout);
                             if behaviour != Behaviour::Wait {
                                 println!("Passenger moved: {:?}", behaviour);
                                 let person = self.layout[i][j].free();
@@ -228,8 +232,9 @@ mod tests {
         }
         aircraft.add_passenger(passenger);
 
-        for i in 0..5 {
-            println!("Updating..");
+        for _ in 0..10 {
+            aircraft.ascii_render();
+            println!("========================");
             aircraft.update();
         }
         assert!(aircraft.layout[2][0].is_occupied(), "Passenger did not make it to seat");
@@ -251,7 +256,7 @@ mod tests {
         // passenger.target_seat(2, 0);
         // aircraft.add_passenger(passenger);
         
-        for _ in 0..100 {
+        for _ in 0..10 {
             aircraft.ascii_render();
             println!("========================");
             aircraft.update();
