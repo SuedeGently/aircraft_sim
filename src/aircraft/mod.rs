@@ -21,6 +21,17 @@ impl Aircraft {
         return aircraft;
     }
 
+    fn copy_layout(&self) -> Vec<Vec<SimpleTile>> {
+        let mut copied_layout = Vec::<Vec<SimpleTile>>::new();
+        for j in 0..self.size.0 as usize {
+            copied_layout.push(Vec::<SimpleTile>::new());
+            for i in 0..self.size.1 as usize {
+                copied_layout[j].push(SimpleTile::new(&self.layout[i][j]));
+            }
+        }
+        return copied_layout;
+    }
+
     fn clear(&mut self) {
         self.layout = Vec::<Vec<Tile>>::new();
         for i in 0..self.size.0 {
@@ -87,23 +98,34 @@ impl Aircraft {
                     self.layout[i][j].get_variant() == Variant::Aisle ||
                     self.layout[i][j].get_variant() == Variant::Seat ) {
                         if self.layout[i][j].get_occupier().is_some() {
-                            let mut surroundings = [SimpleTile::empty(); 9];
-                            let mut pos: usize = 0;
-                            for l in (j as i32 - 1)..(j as i32 + 2) {
-                                for k in (i as i32 - 1)..(i as i32 + 2) {
-                                    if k >= 0 && k < self.size.0 as i32 &&
-                                       l >= 0 && l < self.size.1 as i32 {
-                                        surroundings[pos] = SimpleTile::new(&self.layout[k as usize][l as usize]);
-                                        println!("Tile {},{} = {:?}", k, l, surroundings[pos].get_variant());
-                                    }
-                                    pos += 1;
+                            let (pos_x, pos_y) = (i, j);
+                            let person = self.layout[i][j].get_occupier().unwrap();
+                            let mut current_move = (Behaviour::Wait, 1000.0);
+                            let target_seat = person.get_seat().unwrap(); // TODO: Deal with lack of target
+                            println!("Target seat: {},{}", target_seat.0, target_seat.1);
+
+                            for potential_move in &[
+                                (Behaviour::Wait, (0.0, 0.0)),
+                                (Behaviour::Move_North, (0.0, -1.0)),
+                                (Behaviour::Move_South, (0.0, 1.0)),
+                                (Behaviour::Move_East, (1.0, 0.0)),
+                                (Behaviour::Move_West, (-1.0, 0.0)),
+                            ] {
+                                let (dest_x, dest_y) = (pos_x as f32 + (potential_move.1).0, pos_y as f32 + (potential_move.1).1);
+                                let new_distance = ((target_seat.0 as f32 - dest_x as f32).abs() + (target_seat.1 as f32 - dest_y as f32).abs());
+
+                                if new_distance < current_move.1 {
+                                    current_move = (potential_move.0, new_distance);
+                                    println!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
+                                } else {
+                                    println!("REJECTED: {:?} x {}", potential_move.0, new_distance);
                                 }
                             }
-                            let behaviour = self.layout[i][j].get_occupier().unwrap().update((i as u16,j as u16), surroundings);
-                            if behaviour != Behaviour::Wait {
-                                println!("Passenger moved: {:?}", behaviour);
+
+                            if current_move.0 != Behaviour::Wait {
+                                println!("Passenger moved: {:?}", current_move.0);
                                 let person = self.layout[i][j].free();
-                                match behaviour {
+                                match current_move.0 {
                                     Behaviour::Wait => println!("Wait"),
                                     Behaviour::Move_North => self.layout[i][j - 1].occupy(person.unwrap()),
                                     Behaviour::Move_South => self.layout[i][j + 1].occupy(person.unwrap()),
@@ -259,8 +281,9 @@ mod tests {
         }
         aircraft.add_passenger(passenger);
 
-        for i in 0..5 {
-            println!("Updating..");
+        for _ in 0..10 {
+            aircraft.ascii_render();
+            println!("========================");
             aircraft.update();
         }
         assert!(aircraft.layout[2][0].is_occupied(), "Passenger did not make it to seat");
@@ -282,7 +305,7 @@ mod tests {
         // passenger.target_seat(2, 0);
         // aircraft.add_passenger(passenger);
         
-        for _ in 0..100 {
+        for _ in 0..10 {
             aircraft.ascii_render();
             println!("========================");
             aircraft.update();
