@@ -263,4 +263,28 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn aisle_shifting() {
+        let mut aircraft = Aircraft::new(5,5);
+
+        aircraft.layout[2][4] = Tile::entrance();
+
+        let mut passenger = Person::new("DEFAULT");
+        passenger.target_seat(0,0);
+        aircraft.add_passenger(passenger);
+
+        let mut passenger = Person::new("DEFAULT");
+        passenger.target_seat(1,0);
+        aircraft.add_passenger(passenger);
+
+        for _ in 0..5 {
+            aircraft.ascii_render();
+            println!("========================");
+            aircraft.update();
+        }
+
+        assert!(aircraft.layout[0][0].is_occupied());
+        assert!(aircraft.layout[1][0].is_occupied());
+    }
 }
