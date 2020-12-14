@@ -73,8 +73,7 @@ impl Aircraft {
     fn update(&mut self) {
         for i in 0..self.size.0 as usize {
             for j in 0..self.size.1 as usize{
-                if 
-                    ! self.layout[i][j].has_updated() && (
+                if !self.layout[i][j].has_updated() && (
                     self.layout[i][j].get_variant() == Variant::Entrance ||
                     self.layout[i][j].get_variant() == Variant::Aisle ||
                     self.layout[i][j].get_variant() == Variant::Seat ) {
@@ -84,22 +83,40 @@ impl Aircraft {
                             let mut current_move = (Behaviour::Wait, 1000.0);
                             let target_seat = person.get_seat().unwrap(); // TODO: Deal with lack of target
                             println!("Target seat: {},{}", target_seat.0, target_seat.1);
+                            if self.layout[i][j].get_variant() == Variant::Aisle
+                            || self.layout[i][j].get_variant() == Variant::Entrance {
+                                for potential_move in &[
+                                    (Behaviour::Wait, (0.0, 0.0)),
+                                    (Behaviour::Move_North, (0.0, -1.0)),
+                                    (Behaviour::Move_South, (0.0, 1.0)),
+                                    (Behaviour::Move_East, (1.0, 0.0)),
+                                    (Behaviour::Move_West, (-1.0, 0.0)),
+                                ] {
+                                    let (dest_x, dest_y) = (pos_x as f32 + (potential_move.1).0, pos_y as f32 + (potential_move.1).1);
+                                    let new_distance = ((target_seat.0 as f32 - dest_x as f32).abs() + (target_seat.1 as f32 - dest_y as f32).abs());
 
-                            for potential_move in &[
-                                (Behaviour::Wait, (0.0, 0.0)),
-                                (Behaviour::Move_North, (0.0, -1.0)),
-                                (Behaviour::Move_South, (0.0, 1.0)),
-                                (Behaviour::Move_East, (1.0, 0.0)),
-                                (Behaviour::Move_West, (-1.0, 0.0)),
-                            ] {
-                                let (dest_x, dest_y) = (pos_x as f32 + (potential_move.1).0, pos_y as f32 + (potential_move.1).1);
-                                let new_distance = ((target_seat.0 as f32 - dest_x as f32).abs() + (target_seat.1 as f32 - dest_y as f32).abs());
+                                    if new_distance < current_move.1 {
+                                        current_move = (potential_move.0, new_distance);
+                                        println!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
+                                    } else {
+                                        println!("REJECTED: {:?} x {}", potential_move.0, new_distance);
+                                    }
+                                }
+                            } else if self.layout[i][j].get_variant() == Variant::Seat {
+                                for potential_move in &[
+                                    (Behaviour::Wait, (0.0, 0.0)),
+                                    (Behaviour::Move_East, (1.0, 0.0)),
+                                    (Behaviour::Move_West, (-1.0, 0.0)),
+                                ] {
+                                    let (dest_x, dest_y) = (pos_x as f32 + (potential_move.1).0, pos_y as f32 + (potential_move.1).1);
+                                    let new_distance = ((target_seat.0 as f32 - dest_x as f32).abs() + (target_seat.1 as f32 - dest_y as f32).abs());
 
-                                if new_distance < current_move.1 {
-                                    current_move = (potential_move.0, new_distance);
-                                    println!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
-                                } else {
-                                    println!("REJECTED: {:?} x {}", potential_move.0, new_distance);
+                                    if new_distance < current_move.1 {
+                                        current_move = (potential_move.0, new_distance);
+                                        println!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
+                                    } else {
+                                        println!("REJECTED: {:?} x {}", potential_move.0, new_distance);
+                                    }
                                 }
                             }
 
@@ -240,13 +257,15 @@ mod tests {
 
     #[test]
     fn aisle_ignoring() {
-        let mut aircraft = Aircraft::new(3,3);
+        let mut aircraft = Aircraft::new(5,5);
         let mut passenger = Person::new("Dave");
-        passenger.target_seat(2, 0);
-        aircraft.layout[1][2] = Tile::entrance();
-        for i in 0..3 {
+        passenger.target_seat(4, 0);
+        aircraft.layout[2][4] = Tile::entrance();
+        for i in 0..5 {
             aircraft.layout[0][i] = Tile::seat();
-            aircraft.layout[2][i] = Tile::seat();
+            aircraft.layout[1][i] = Tile::seat();
+            aircraft.layout[3][i] = Tile::seat();
+            aircraft.layout[4][i] = Tile::seat();
         }
         aircraft.add_passenger(passenger);
 
@@ -255,7 +274,7 @@ mod tests {
             println!("========================");
             aircraft.update();
         }
-        assert!(aircraft.layout[2][0].is_occupied(), "Passenger did not make it to seat");
+        assert!(aircraft.layout[4][0].is_occupied(), "Passenger did not make it to seat");
     }
 
     #[test]
@@ -292,6 +311,12 @@ mod tests {
         let mut aircraft = Aircraft::new(5,5);
 
         aircraft.layout[2][4] = Tile::entrance();
+        for i in 0..5 {
+            aircraft.layout[0][i] = Tile::seat();
+            aircraft.layout[1][i] = Tile::seat();
+            aircraft.layout[3][i] = Tile::seat();
+            aircraft.layout[4][i] = Tile::seat();
+        }
 
         let mut passenger = Person::new("DEFAULT");
         passenger.target_seat(0,0);
@@ -301,7 +326,7 @@ mod tests {
         passenger.target_seat(1,0);
         aircraft.add_passenger(passenger);
 
-        for _ in 0..5 {
+        for _ in 0..10 {
             aircraft.ascii_render();
             println!("========================");
             aircraft.update();
