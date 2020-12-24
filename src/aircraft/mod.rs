@@ -1,7 +1,7 @@
 mod tile;
 mod person;
 
-use tile::{Tile, Variant, SimpleTile};
+use tile::{Tile, Variant};
 use person::{Person, Behaviour};
 
 pub struct Aircraft {
@@ -21,16 +21,16 @@ impl Aircraft {
         return aircraft;
     }
 
-    fn copy_layout(&self) -> Vec<Vec<SimpleTile>> {
-        let mut copied_layout = Vec::<Vec<SimpleTile>>::new();
-        for j in 0..self.size.0 as usize {
-            copied_layout.push(Vec::<SimpleTile>::new());
-            for i in 0..self.size.1 as usize {
-                copied_layout[j].push(SimpleTile::new(&self.layout[i][j]));
-            }
-        }
-        return copied_layout;
-    }
+    // fn copy_layout(&self) -> Vec<Vec<SimpleTile>> {
+    //     let mut copied_layout = Vec::<Vec<SimpleTile>>::new();
+    //     for j in 0..self.size.0 as usize {
+    //         copied_layout.push(Vec::<SimpleTile>::new());
+    //         for i in 0..self.size.1 as usize {
+    //             copied_layout[j].push(SimpleTile::new(&self.layout[i][j]));
+    //         }
+    //     }
+    //     return copied_layout;
+    // }
 
     fn clear(&mut self) {
         self.layout = Vec::<Vec<Tile>>::new();

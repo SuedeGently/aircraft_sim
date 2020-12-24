@@ -102,31 +102,31 @@ impl fmt::Debug for Tile {
     }
 }
 
-#[derive(Clone, Copy)]
-pub struct SimpleTile {
-    variant: Variant,
-    occupied: bool,
-}
-
-impl SimpleTile {
-    pub fn new(t: &Tile) -> SimpleTile {
-        SimpleTile {
-            variant: t.get_variant(),
-            occupied: t.is_occupied(),
-        }
-    }
-
-    pub fn empty() -> SimpleTile {
-        SimpleTile {
-            variant: Variant::None,
-            occupied: false,
-        }
-    }
-
-    pub fn get_variant(&self) -> Variant {
-        return self.variant;
-    }
-}
+// #[derive(Clone, Copy)]
+// pub struct SimpleTile {
+//     variant: Variant,
+//     occupied: bool,
+// }
+// 
+// impl SimpleTile {
+//     pub fn new(t: &Tile) -> SimpleTile {
+//         SimpleTile {
+//             variant: t.get_variant(),
+//             occupied: t.is_occupied(),
+//         }
+//     }
+// 
+//     pub fn empty() -> SimpleTile {
+//         SimpleTile {
+//             variant: Variant::None,
+//             occupied: false,
+//         }
+//     }
+// 
+//     pub fn get_variant(&self) -> Variant {
+//         return self.variant;
+//     }
+// }
 
 #[cfg(test)]
 mod tests {
