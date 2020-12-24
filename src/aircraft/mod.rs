@@ -93,13 +93,52 @@ impl Aircraft {
                                     (Behaviour::Move_West, (-1.0, 0.0)),
                                 ] {
                                     let (dest_x, dest_y) = (pos_x as f32 + (potential_move.1).0, pos_y as f32 + (potential_move.1).1);
-                                    let new_distance = ((target_seat.0 as f32 - dest_x as f32).abs() + (target_seat.1 as f32 - dest_y as f32).abs());
-
-                                    if new_distance < current_move.1 {
-                                        current_move = (potential_move.0, new_distance);
-                                        println!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
-                                    } else {
-                                        println!("REJECTED: {:?} x {}", potential_move.0, new_distance);
+                                    if dest_x >= 0.0 && dest_x < self.size.0 as f32
+                                    && dest_y >= 0.0 && dest_y < self.size.1 as f32 {
+                                        let new_distance = ((target_seat.0 as f32 - dest_x as f32).abs() + (target_seat.1 as f32 - dest_y as f32).abs());
+                                        
+                                        if new_distance < current_move.1 {
+                                            if self.layout[dest_x as usize][dest_y as usize].get_variant() == Variant::Seat && dest_y == target_seat.1 as f32 {
+                                                let mut obstacle = false;
+                                                if dest_x < i as f32 {
+                                                    for i in target_seat.0 as usize .. dest_x as usize + 1 {
+                                                        println!("Checking if {},{} occupied", i, dest_y);
+                                                        if self.layout[i][j].is_occupied() {
+                                                            obstacle = true;
+                                                        }
+                                                    }
+                                                } else {
+                                                    for i in dest_x as usize .. target_seat.0 as usize + 1 {
+                                                        println!("Checking if {},{} occupied", dest_y, dest_x);
+                                                        if self.layout[i][j].is_occupied() {
+                                                            obstacle = true;
+                                                        }
+                                                    }
+                                                }
+                                                if dest_x < i as f32 {
+                                                    for i in target_seat.0 as usize .. dest_x as usize + 1 {
+                                                        println!("Checking if {},{} occupied", i, dest_y);
+                                                        self.layout[i][j].is_shifting();
+                                                    }
+                                                } else {
+                                                    for i in dest_x as usize .. target_seat.0 as usize + 1 {
+                                                        println!("Checking if {},{} occupied", dest_y, dest_x);
+                                                        self.layout[i][j].is_shifting();
+                                                    }
+                                                }
+                                                if !obstacle {
+                                                    current_move = (potential_move.0, new_distance);
+                                                    println!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
+                                                } else {
+                                                    println!("AISLE SHIFT REQUIRED; NOT IMPLEMENTED");
+                                                }
+                                            } else if !self.layout[dest_x as usize][dest_y as usize].is_occupied() {
+                                                current_move = (potential_move.0, new_distance);
+                                                println!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
+                                            } else {
+                                                println!("REJECTED: {:?} x {}", potential_move.0, new_distance);
+                                            }
+                                        }
                                     }
                                 }
                             } else if self.layout[i][j].get_variant() == Variant::Seat {

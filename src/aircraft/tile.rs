@@ -13,6 +13,7 @@ pub struct Tile {
     variant: Variant,
     occupier: Option<Person>,
     updated: bool,
+    shifting: bool,
 }
 
 impl Tile {
@@ -21,6 +22,7 @@ impl Tile {
             variant: Variant::Aisle,
             occupier: None,
             updated: false,
+            shifting: false,
         }
     }
 
@@ -29,6 +31,7 @@ impl Tile {
             variant: Variant::Seat,
             occupier: None,
             updated: false,
+            shifting: false,
         }
     }
 
@@ -37,6 +40,7 @@ impl Tile {
             variant: Variant::Entrance,
             occupier: None,
             updated: false,
+            shifting: false,
         }
     }
 
@@ -45,6 +49,7 @@ impl Tile {
             variant: Variant::None,
             occupier: None,
             updated: false,
+            shifting: false,
         }
     }
 
@@ -58,6 +63,10 @@ impl Tile {
             Some(_) => true,
             None => false,
         }
+    }
+
+    pub fn is_shifting(&self) -> bool {
+        self.shifting
     }
 
     pub fn get_variant(&self) -> Variant {
