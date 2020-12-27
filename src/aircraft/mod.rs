@@ -335,4 +335,9 @@ mod tests {
         assert!(aircraft.layout[0][0].is_occupied());
         assert!(aircraft.layout[1][0].is_occupied());
     }
+
+    #[test]
+    fn stowing() {
+        panic!("Test not yet implemented");
+    }
 }
