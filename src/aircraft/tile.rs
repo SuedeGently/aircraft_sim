@@ -13,6 +13,7 @@ pub struct Tile {
     variant: Variant,
     occupier: Option<Person>,
     updated: bool,
+    allowing_to_pass: bool,
 }
 
 impl Tile {
@@ -21,6 +22,7 @@ impl Tile {
             variant: Variant::Aisle,
             occupier: None,
             updated: false,
+            allowing_to_pass: true,
         }
     }
 
@@ -29,6 +31,7 @@ impl Tile {
             variant: Variant::Seat,
             occupier: None,
             updated: false,
+            allowing_to_pass: true,
         }
     }
 
@@ -37,6 +40,7 @@ impl Tile {
             variant: Variant::Entrance,
             occupier: None,
             updated: false,
+            allowing_to_pass: true,
         }
     }
 
@@ -45,6 +49,7 @@ impl Tile {
             variant: Variant::None,
             occupier: None,
             updated: false,
+            allowing_to_pass: true,
         }
     }
 
