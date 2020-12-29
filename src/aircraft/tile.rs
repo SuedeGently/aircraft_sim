@@ -170,4 +170,24 @@ mod tests {
         // tile.get_occupier().unwrap().set_name("Bert");
         // assert_eq!(tile.get_occupier().unwrap().get_name(), "Bert");
     }
+
+    #[test]
+    fn allow_to_pass() {
+        let mut tile0 = Tile::aisle();
+        let mut tile1 = Tile::aisle();
+        let person = Person::new("DEFAULT");
+
+        tile0.occupy(person);
+        assert!(
+            tile0.is_occupied(),
+            "Tile 0 was not occupied at initialisation");
+
+        let temp = tile1.free().expect("No passenger was present in tile 0");
+
+        tile1.allow_to_pass(temp);
+        assert_eq!(tile0.is_occupied(), false, "Tile 0 was still occupied");
+        assert!(tile1.is_allowing(), "Tile 1 was not allowing");
+
+        panic!("This test is unfinished");
+    }
 }
