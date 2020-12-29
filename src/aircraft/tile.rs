@@ -14,6 +14,7 @@ pub struct Tile {
     occupier: Option<Person>,
     updated: bool,
     allowing_to_pass: bool,
+    allowing: Option<Person>,
 }
 
 impl Tile {
@@ -23,6 +24,7 @@ impl Tile {
             occupier: None,
             updated: false,
             allowing_to_pass: true,
+            allowing: None,
         }
     }
 
@@ -32,6 +34,7 @@ impl Tile {
             occupier: None,
             updated: false,
             allowing_to_pass: true,
+            allowing: None,
         }
     }
 
@@ -41,6 +44,7 @@ impl Tile {
             occupier: None,
             updated: false,
             allowing_to_pass: true,
+            allowing: None,
         }
     }
 
@@ -50,6 +54,7 @@ impl Tile {
             occupier: None,
             updated: false,
             allowing_to_pass: true,
+            allowing: None,
         }
     }
 
@@ -58,11 +63,20 @@ impl Tile {
         self.updated = true;
     }
 
+    pub fn allow_to_pass(&mut self, p: Person) {
+        self.allowing = Some(p);
+        self.allowing_to_pass = true;
+    }
+
     pub fn is_occupied(&self) -> bool {
         match self.occupier {
             Some(_) => true,
             None => false,
         }
+    }
+
+    pub fn is_allowing(&self) -> bool {
+        self.allowing_to_pass
     }
 
     pub fn get_variant(&self) -> Variant {
