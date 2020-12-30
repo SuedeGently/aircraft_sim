@@ -63,9 +63,15 @@ impl Tile {
         self.updated = true;
     }
 
-    pub fn allow_to_pass(&mut self, p: Person) {
+    pub fn pass_in(&mut self, p: Person) {
         self.allowing = Some(p);
         self.allowing_to_pass = true;
+    }
+
+    pub fn pass_out(&mut self) -> Person {
+        let person = self.allowing.take();
+        self.allowing_to_pass = false;
+        return person.unwrap();
     }
 
     pub fn is_occupied(&self) -> bool {
@@ -175,19 +181,22 @@ mod tests {
     fn allow_to_pass() {
         let mut tile0 = Tile::aisle();
         let mut tile1 = Tile::aisle();
-        let person = Person::new("DEFAULT");
+        let mut person = Person::new("DEFAULT");
+        person.target_seat(0,0);
 
         tile0.occupy(person);
         assert!(
             tile0.is_occupied(),
             "Tile 0 was not occupied at initialisation");
 
-        let temp = tile1.free().expect("No passenger was present in tile 0");
+        let temp = tile0.free().expect("No passenger was present in tile 0");
 
-        tile1.allow_to_pass(temp);
+        tile1.pass_in(temp);
         assert_eq!(tile0.is_occupied(), false, "Tile 0 was still occupied");
         assert!(tile1.is_allowing(), "Tile 1 was not allowing");
 
-        panic!("This test is unfinished");
+        tile0.occupy(tile1.pass_out());
+        assert!(tile0.is_occupied(), "Tile 0 was not occupied post pass");
+        assert_eq!(tile1.is_allowing(), false, "Tile 1 was still allowing");
     }
 }
