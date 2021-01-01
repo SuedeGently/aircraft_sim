@@ -73,11 +73,14 @@ impl Aircraft {
     fn update(&mut self) {
         for i in 0..self.size.0 as usize {
             for j in 0..self.size.1 as usize{
-                if !self.layout[i][j].has_updated() && (
+                // Check current tile variant
+                    if !self.layout[i][j].has_updated() && (
                     self.layout[i][j].get_variant() == Variant::Entrance ||
                     self.layout[i][j].get_variant() == Variant::Aisle ||
                     self.layout[i][j].get_variant() == Variant::Seat ) {
+                        // Check whether current tile is occupied
                         if self.layout[i][j].get_occupier().is_some() {
+                            // Choose movement
                             let (pos_x, pos_y) = (i, j);
                             let person = self.layout[i][j].get_occupier().unwrap();
                             let mut current_move = (Behaviour::Wait, 1000.0);
@@ -85,6 +88,7 @@ impl Aircraft {
                             println!("Target seat: {},{}", target_seat.0, target_seat.1);
                             if self.layout[i][j].get_variant() == Variant::Aisle
                             || self.layout[i][j].get_variant() == Variant::Entrance {
+                                // Decide movement based on other tile
                                 for potential_move in &[
                                     (Behaviour::Wait, (0.0, 0.0)),
                                     (Behaviour::Move_North, (0.0, -1.0)),
@@ -93,16 +97,26 @@ impl Aircraft {
                                     (Behaviour::Move_West, (-1.0, 0.0)),
                                 ] {
                                     let (dest_x, dest_y) = (pos_x as f32 + (potential_move.1).0, pos_y as f32 + (potential_move.1).1);
+                                    let (dest_x, dest_y) = (dest_x as usize, dest_y as usize);
                                     let new_distance = ((target_seat.0 as f32 - dest_x as f32).abs() + (target_seat.1 as f32 - dest_y as f32).abs());
 
                                     if new_distance < current_move.1 {
-                                        current_move = (potential_move.0, new_distance);
-                                        println!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
+                                        // Check whether desired seat is occupied
+                                        if !self.layout[dest_x][dest_y].is_occupied() || (dest_x, dest_y) == (i, j) {
+                                            current_move = (potential_move.0, new_distance);
+                                            println!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
+                                        } else if !self.layout[dest_x][dest_y].is_allowing() {
+                                            current_move = (potential_move.0, new_distance);
+                                            println!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
+                                        } else {
+                                            println!("REJECTED: {:?} x {}", potential_move.0, new_distance);
+                                        }
                                     } else {
                                         println!("REJECTED: {:?} x {}", potential_move.0, new_distance);
                                     }
                                 }
                             } else if self.layout[i][j].get_variant() == Variant::Seat {
+                                // Decide movement based on other tile
                                 for potential_move in &[
                                     (Behaviour::Wait, (0.0, 0.0)),
                                     (Behaviour::Move_East, (1.0, 0.0)),
@@ -135,9 +149,11 @@ impl Aircraft {
                                 println!("Passenger waited");
                             }
                         }
+                        
                         if self.layout[i][j].get_variant() == Variant::Entrance && self.passengers.len() > 0 {
                             self.layout[i][j]
                                 .occupy(self.passengers.pop().unwrap());
+                            println!("Added passenger");
                         }
                 }
             }
@@ -221,19 +237,28 @@ mod tests {
         println!("Adding entrance and updating");
         aircraft.layout[2][2] = Tile::entrance();
         // aircraft.layout[2][3] = Tile::aisle();
+        aircraft.ascii_render();
         aircraft.update();
+        aircraft.ascii_render();
         assert_eq!(aircraft.passengers.len(), 0, "Passenger was not removed from passengers array");
         assert!(aircraft.layout[2][2].is_occupied(), "Passenger was not added to entrance tile");
 
         println!("Updating");
         aircraft.update();
+        aircraft.ascii_render();
         println!("Updating");
         aircraft.update();
+        aircraft.ascii_render();
+        aircraft.update();
+        aircraft.ascii_render();
+        aircraft.update();
+        aircraft.ascii_render();
         assert_eq!(aircraft.layout[2][2].is_occupied(), false, "Passenger did not move from entrance");
         assert!(aircraft.layout[1][1].is_occupied(), "Passenger did not make it to target seat");
 
         println!("Updating once too much");
         aircraft.update();
+        aircraft.ascii_render();
         assert!(aircraft.layout[1][1].is_occupied(), "Passenger shouldn't have moved from their seat");
     }
 
