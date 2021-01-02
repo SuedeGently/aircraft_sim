@@ -93,6 +93,10 @@ impl Tile {
         return self.occupier.as_ref();
     }
 
+    pub fn get_passer(&self) -> Option<&Person> {
+        self.allowing.as_ref()
+    }
+
     pub fn has_updated(&self) -> bool {
         self.updated
     }
