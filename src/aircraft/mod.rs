@@ -109,6 +109,7 @@ impl Aircraft {
                                             current_move = (potential_move.0, new_distance);
                                             println!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
                                         } else {
+                                            println!("No room to get past");
                                             println!("REJECTED: {:?} x {}", potential_move.0, new_distance);
                                         }
                                     } else {
