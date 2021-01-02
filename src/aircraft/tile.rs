@@ -23,7 +23,7 @@ impl Tile {
             variant: Variant::Aisle,
             occupier: None,
             updated: false,
-            allowing_to_pass: true,
+            allowing_to_pass: false,
             allowing: None,
         }
     }
@@ -33,7 +33,7 @@ impl Tile {
             variant: Variant::Seat,
             occupier: None,
             updated: false,
-            allowing_to_pass: true,
+            allowing_to_pass: false,
             allowing: None,
         }
     }
@@ -43,7 +43,7 @@ impl Tile {
             variant: Variant::Entrance,
             occupier: None,
             updated: false,
-            allowing_to_pass: true,
+            allowing_to_pass: false,
             allowing: None,
         }
     }
@@ -53,7 +53,7 @@ impl Tile {
             variant: Variant::None,
             occupier: None,
             updated: false,
-            allowing_to_pass: true,
+            allowing_to_pass: false,
             allowing: None,
         }
     }

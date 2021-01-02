@@ -98,6 +98,7 @@ impl Aircraft {
                                 ] {
                                     let (dest_x, dest_y) = (pos_x as f32 + (potential_move.1).0, pos_y as f32 + (potential_move.1).1);
                                     let (dest_x, dest_y) = (dest_x as usize, dest_y as usize);
+                                    println!("Checking {},{}", dest_x, dest_y);
                                     let new_distance = ((target_seat.0 as f32 - dest_x as f32).abs() + (target_seat.1 as f32 - dest_y as f32).abs());
 
                                     if new_distance < current_move.1 {
@@ -137,14 +138,28 @@ impl Aircraft {
 
                             if current_move.0 != Behaviour::Wait {
                                 println!("Passenger moved: {:?}", current_move.0);
-                                let person = self.layout[i][j].free();
-                                match current_move.0 {
-                                    Behaviour::Wait => println!("Wait"),
-                                    Behaviour::Move_North => self.layout[i][j - 1].occupy(person.unwrap()),
-                                    Behaviour::Move_South => self.layout[i][j + 1].occupy(person.unwrap()),
-                                    Behaviour::Move_East => self.layout[i + 1][j].occupy(person.unwrap()),
-                                    Behaviour::Move_West => self.layout[i - 1][j].occupy(person.unwrap()),
-                                    _ => panic!("Impossible movement"),
+
+                                if current_move.0 == Behaviour::Wait {
+                                    // Do nothing
+                                } else {
+
+                                    let coords = match current_move.0 {
+                                        Behaviour::Move_North => (i, j - 1),
+                                        Behaviour::Move_South => (i, j + 1),
+                                        Behaviour::Move_East => (i + 1, j),
+                                        Behaviour::Move_West => (i - 1, j),
+                                        _ => panic!("Impossible movement"),
+                                    };
+                                    
+                                    if !self.layout[coords.0][coords.1].is_occupied() {
+                                        let person = self.layout[i][j].free();
+                                        self.layout[coords.0][coords.1].occupy(person.unwrap());
+                                    } else if !self.layout[coords.0][coords.1].is_allowing() {
+                                        let person = self.layout[i][j].free();
+                                        self.layout[coords.0][coords.1].pass_in(person.unwrap());
+                                    } else {
+                                        println!("Wait");
+                                    }
                                 }
                             } else {
                                 println!("Passenger waited");
