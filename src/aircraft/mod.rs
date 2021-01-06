@@ -145,27 +145,22 @@ impl Aircraft {
                             if current_move.0 != Behaviour::Wait {
                                 println!("Passenger moved: {:?}", current_move.0);
 
-                                if current_move.0 == Behaviour::Wait {
-                                    // Do nothing
+                                let coords = match current_move.0 {
+                                    Behaviour::Move_North => (i, j - 1),
+                                    Behaviour::Move_South => (i, j + 1),
+                                    Behaviour::Move_East => (i + 1, j),
+                                    Behaviour::Move_West => (i - 1, j),
+                                    _ => panic!("Impossible movement"),
+                                };
+                                
+                                if !self.layout[coords.0][coords.1].is_occupied() {
+                                    let person = self.layout[i][j].free();
+                                    self.layout[coords.0][coords.1].occupy(person.unwrap());
+                                } else if !self.layout[coords.0][coords.1].is_allowing() {
+                                    let person = self.layout[i][j].free();
+                                    self.layout[coords.0][coords.1].pass_in(person.unwrap());
                                 } else {
-
-                                    let coords = match current_move.0 {
-                                        Behaviour::Move_North => (i, j - 1),
-                                        Behaviour::Move_South => (i, j + 1),
-                                        Behaviour::Move_East => (i + 1, j),
-                                        Behaviour::Move_West => (i - 1, j),
-                                        _ => panic!("Impossible movement"),
-                                    };
-                                    
-                                    if !self.layout[coords.0][coords.1].is_occupied() {
-                                        let person = self.layout[i][j].free();
-                                        self.layout[coords.0][coords.1].occupy(person.unwrap());
-                                    } else if !self.layout[coords.0][coords.1].is_allowing() {
-                                        let person = self.layout[i][j].free();
-                                        self.layout[coords.0][coords.1].pass_in(person.unwrap());
-                                    } else {
-                                        println!("Wait");
-                                    }
+                                    println!("Wait");
                                 }
                             } else {
                                 println!("Passenger waited");
@@ -174,60 +169,10 @@ impl Aircraft {
                         
                         if self.layout[i][j].is_allowing() {
                             // Choose movement
-                            let (pos_x, pos_y) = (i, j);
-                            let person = self.layout[i][j].get_passer().unwrap();
-                            let mut current_move = (Behaviour::Wait, 1000.0);
-                            let target_seat = person.get_seat().unwrap(); // TODO: Deal with lack of target
-                            println!("Target seat: {},{}", target_seat.0, target_seat.1);
-                            if self.layout[i][j].get_variant() == Variant::Aisle
-                            || self.layout[i][j].get_variant() == Variant::Entrance {
-                                // Decide movement based on other tile
-                                for potential_move in &[
-                                    (Behaviour::Wait, (0.0, 0.0)),
-                                    (Behaviour::Move_North, (0.0, -1.0)),
-                                    (Behaviour::Move_South, (0.0, 1.0)),
-                                    (Behaviour::Move_East, (1.0, 0.0)),
-                                    (Behaviour::Move_West, (-1.0, 0.0)),
-                                ] {
-                                    let (dest_x, dest_y) = (pos_x as f32 + (potential_move.1).0, pos_y as f32 + (potential_move.1).1);
-                                    let (dest_x, dest_y) = (dest_x as usize, dest_y as usize);
-                                    println!("Checking {},{}", dest_x, dest_y);
-                                    let new_distance = ((target_seat.0 as f32 - dest_x as f32).abs() + (target_seat.1 as f32 - dest_y as f32).abs());
-
-                                    if new_distance < current_move.1 {
-                                        // Check whether desired seat is occupied
-                                        if !self.layout[dest_x][dest_y].is_occupied() || (dest_x, dest_y) == (i, j) {
-                                            current_move = (potential_move.0, new_distance);
-                                            println!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
-                                        } else if !self.layout[dest_x][dest_y].is_allowing() {
-                                            current_move = (potential_move.0, new_distance);
-                                            println!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
-                                        } else {
-                                            println!("No room to get past");
-                                            println!("REJECTED: {:?} x {}", potential_move.0, new_distance);
-                                        }
-                                    } else {
-                                        println!("REJECTED: {:?} x {}", potential_move.0, new_distance);
-                                    }
-                                }
-                            } else if self.layout[i][j].get_variant() == Variant::Seat {
-                                // Decide movement based on other tile
-                                for potential_move in &[
-                                    (Behaviour::Wait, (0.0, 0.0)),
-                                    (Behaviour::Move_East, (1.0, 0.0)),
-                                    (Behaviour::Move_West, (-1.0, 0.0)),
-                                ] {
-                                    let (dest_x, dest_y) = (pos_x as f32 + (potential_move.1).0, pos_y as f32 + (potential_move.1).1);
-                                    let new_distance = ((target_seat.0 as f32 - dest_x as f32).abs() + (target_seat.1 as f32 - dest_y as f32).abs());
-
-                                    if new_distance < current_move.1 {
-                                        current_move = (potential_move.0, new_distance);
-                                        println!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
-                                    } else {
-                                        println!("REJECTED: {:?} x {}", potential_move.0, new_distance);
-                                    }
-                                }
-                            }
+                            
+                            let target = self.layout[i][j].get_passer().unwrap().get_seat().unwrap();
+                            let current_move = self.determine_move(i, j, target.0, target.1); // HERE
+                            
 
                             if current_move.0 != Behaviour::Wait {
                                 println!("Passenger moved: {:?}", current_move.0);
