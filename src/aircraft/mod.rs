@@ -1,6 +1,8 @@
 mod tile;
 mod person;
 
+use simple_logger::SimpleLogger;
+
 use tile::{Tile, Variant, SimpleTile};
 use person::{Person, Behaviour};
 
@@ -12,6 +14,8 @@ pub struct Aircraft {
 
 impl Aircraft {
     pub fn new(x: u16, y: u16) -> Aircraft {
+        log::info!("Initialising aircraft with size {},{}", x, y);
+
         let mut aircraft = Aircraft {
             size: (x, y),
             layout: Vec::<Vec<Tile>>::new(),

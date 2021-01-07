@@ -1,9 +1,19 @@
 mod aircraft;
 
+use simple_logger::SimpleLogger;
+
 use aircraft::Aircraft;
 
+fn test() {
+    println!("Logging(?)");
+    log::warn!("Hmm");
+}
+
 fn main() {
-    println!("Nothing happened!");
+    SimpleLogger::new().init().unwrap();
+    log::info!("Initialised logger");
+
+    let test = Aircraft::new(5,5);
 }
 
 #[cfg(test)]
