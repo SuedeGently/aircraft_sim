@@ -413,4 +413,38 @@ mod tests {
         assert!(aircraft.layout[0][0].is_occupied());
         assert!(aircraft.layout[1][0].is_occupied());
     }
+
+    #[test]
+    fn bad_order() {
+        let mut aircraft = Aircraft::new(5,5);
+        
+        for i in 0..5 {
+            for j in &[0,1,3,4] {
+                aircraft.layout[*j][i] = Tile::seat();
+            }
+        }
+        aircraft.layout[2][4] = Tile::entrance();
+
+        for i in 0..3 {
+            for j in &[0,1,4,3] {
+                let mut passenger = Person::new("DEFAULT");
+                passenger.target_seat(*j, i);
+                aircraft.add_passenger(passenger);
+            }
+        }
+
+
+        for _ in 0..20 {
+            aircraft.ascii_render();
+            println!("==========");
+            aircraft.update();
+        }
+
+        // Check results
+        for i in 0..3 {
+            for j in &[0,1,4,3] {
+                assert!(aircraft.layout[*j][i].is_occupied());
+            }
+        }
+    }
 }
