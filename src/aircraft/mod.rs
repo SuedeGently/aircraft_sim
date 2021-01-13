@@ -1,4 +1,4 @@
-mod tile;
+pub mod tile;
 mod person;
 
 use tile::{Tile, Variant, SimpleTile};
@@ -235,6 +235,34 @@ impl Aircraft {
             for j in 0..self.size.1 as usize {
                 self.layout[i][j].set_updated(false);
             }
+        }
+    }
+
+    pub fn set_tile(&mut self, x: u16, y: u16, var: Variant) {
+        self.layout[x as usize][y as usize] = match var {
+            Variant::Aisle => Tile::aisle(),
+            Variant::Seat => Tile::seat(),
+            Variant::Entrance => Tile::entrance(),
+        };
+    }
+
+    pub fn str_set_tile(&mut self, x: u16, y: u16, var: &str) {
+        let valid = match var {
+            "aisle" => true,
+            "seat" => true,
+            "entrance" => true,
+            _ => false,
+        };
+
+        if valid {
+            self.layout[x as usize][y as usize] = match var {
+                "aisle" => Tile::aisle(),
+                "seat" => Tile::seat(),
+                "entrance" => Tile::entrance(),
+                _ => Tile::none(),
+            };
+        } else {
+            // Invalid variant
         }
     }
 

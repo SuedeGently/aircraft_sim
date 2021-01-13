@@ -18,7 +18,7 @@ pub struct Tile {
 }
 
 impl Tile {
-    pub fn aisle() -> Tile {
+    pub(crate) fn aisle() -> Tile {
         Tile {
             variant: Variant::Aisle,
             occupier: None,

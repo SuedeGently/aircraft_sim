@@ -2,12 +2,12 @@ use std::fs::File;
 use std::path::Path;
 
 use super::aircraft::Aircraft;
-use super::aircraft::Tile;
+use super::aircraft::tile::{Tile,Variant};
 
 struct seat_data {
     seat_x: u16,
     seat_y: u16,
-    variant: String,
+    variant: Variant,
 }
 
 impl seat_data {
@@ -15,7 +15,7 @@ impl seat_data {
         seat_data {
             seat_x: x,
             seat_y: y,
-            variant: variant.to_string(),
+            variant: str_to_var(variant),
         }
     }
 
@@ -27,8 +27,17 @@ impl seat_data {
         self.seat_y
     }
 
-    fn get_variant(&self) -> String {
+    fn get_variant(&self) -> Variant {
         self.variant
+    }
+}
+
+fn str_to_var(var: &str) -> Variant {
+    match var {
+        "aisle" => Variant::Aisle,
+        "seat" => Variant::Seat,
+        "entrance" => Variant::Entrance,
+        _ => Variant::None, // Shouldn't happen
     }
 }
 
@@ -71,8 +80,10 @@ fn read_layout(path: &Path) -> Option<Aircraft> {
 
     let aircraft = Aircraft::new(size_x, size_y);
     for i in seats {
-        aircraft.layout[i.get_x(), i.get_y()] = match i.get_variant() {
-            "aisle" => 
+        aircraft.set_tile(i.get_x(), i.get_y(), i.get_variant());
+    }
+
+    return Some(aircraft);
 }
 
 #[cfg(test)]
