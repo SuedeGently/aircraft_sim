@@ -1,5 +1,6 @@
 pub mod tile;
-mod person;
+pub mod person;
+
 
 use tile::{Tile, Variant, SimpleTile};
 use person::{Person, Behaviour};
@@ -42,11 +43,11 @@ impl Aircraft {
         }
     }
 
-    fn add_passenger(&mut self, p: Person) {
+    pub fn add_passenger(&mut self, p: Person) {
         self.passengers.push(p);
     }
 
-    fn ascii_render(&self) {
+    pub fn ascii_render(&self) {
         print!("   ");
         for i in 0..self.size.0 {
             print!("{}", i);
@@ -128,7 +129,7 @@ impl Aircraft {
         return current_move;
     }
 
-    fn update(&mut self) {
+    pub fn update(&mut self) {
         for x in 0..self.size.0 as usize {
             for y in 0..self.size.1 as usize{
                 // Check current tile variant
@@ -243,6 +244,7 @@ impl Aircraft {
             Variant::Aisle => Tile::aisle(),
             Variant::Seat => Tile::seat(),
             Variant::Entrance => Tile::entrance(),
+            Variant::None => Tile::none(),
         };
     }
 
@@ -268,6 +270,10 @@ impl Aircraft {
 
     pub fn get_size(&self) -> (u16, u16) {
         (self.size.0, self.size.1)
+    }
+
+    pub fn check_if_occupied(&self, x: u16, y: u16) -> bool {
+        self.layout[x as usize][y as usize].is_occupied()
     }
 }
 

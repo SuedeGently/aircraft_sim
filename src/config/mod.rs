@@ -41,7 +41,7 @@ fn str_to_var(var: &str) -> Variant {
     }
 }
 
-fn read_passengers(path: &Path) -> Vec<[String; 3]> {
+pub fn read_passengers(path: &Path) -> Option<Vec<[String; 3]>> {
     let mut persons = Vec::<[String; 3]>::new();
     let file = File::open(path).expect("Invalid file path");
     let mut rdr = csv::Reader::from_reader(file);
@@ -54,11 +54,11 @@ fn read_passengers(path: &Path) -> Vec<[String; 3]> {
         ];
         persons.push(data);
     }
-    return persons;
+    return Some(persons);
 }
 
-fn read_layout(path: &Path) -> Option<Aircraft> {
-    let seats = Vec::<seat_data>::new();
+pub fn read_layout(path: &Path) -> Option<Aircraft> {
+    let mut seats = Vec::<seat_data>::new();
     let file = File::open(path).expect("Invalid file path");
     let mut rdr = csv::Reader::from_reader(file);
     
@@ -72,13 +72,15 @@ fn read_layout(path: &Path) -> Option<Aircraft> {
         seats.push(data);
     }
     
-    let (size_x, size_y) = (0, 0);
-    for i in seats {
+    let (mut size_x, mut size_y) = (0, 0);
+    for i in &seats {
         if i.get_x() > size_x { size_x = i.get_x() }
         if i.get_y() > size_y { size_y = i.get_y() }
     }
+    size_x = size_x + 1;
+    size_y = size_y + 1;
 
-    let aircraft = Aircraft::new(size_x, size_y);
+    let mut aircraft = Aircraft::new(size_x, size_y);
     for i in seats {
         aircraft.set_tile(i.get_x(), i.get_y(), i.get_variant());
     }
@@ -92,7 +94,7 @@ mod tests {
 
     #[test]
     fn test_read_passengers() {
-        let persons = read_passengers(Path::new("./config/test_passengers.csv"));
+        let persons = read_passengers(Path::new("./config/test_passengers.csv")).unwrap();
 
         assert_eq!(persons.len(), 2, "Incorrect number of records");
 
@@ -100,5 +102,21 @@ mod tests {
 
         assert_eq!(person[0], "person0", "First record's name was wrong");
         assert_eq!(person[1], "0", "First record's x coord was wrong");
+    }
+
+    #[test]
+    fn test_read_layout() {
+        let aircraft = read_layout(Path::new("./config/test_layout.csv")).unwrap();
+
+        assert_eq!((5,5), aircraft.get_size());
+    }
+
+    #[test]
+    fn test_str_to_var() {
+        assert_eq!(str_to_var("aisle"), Variant::Aisle);
+        assert_eq!(str_to_var("seat"), Variant::Seat);
+        assert_eq!(str_to_var("entrance"), Variant::Entrance);
+        assert_eq!(str_to_var("none"), Variant::None);
+        assert_eq!(str_to_var("invalid"), Variant::None);
     }
 }
