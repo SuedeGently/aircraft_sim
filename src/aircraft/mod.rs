@@ -135,7 +135,7 @@ impl Aircraft {
 
     pub fn update(&mut self) {
         for x in 0..self.size.0 as usize {
-            for y in 0..self.size.1 as usize{
+            for y in 0..self.size.1 as usize {
                 // Check current tile variant
                     if !self.layout[x][y].has_updated() && (
                     self.layout[x][y].get_variant() == Variant::Entrance ||
@@ -183,6 +183,12 @@ impl Aircraft {
                         
                         if self.layout[x][y].is_allowing() {
                             // Choose movement
+
+                            if self.layout[x][y].pass_count() {
+                                log::info!("Moved");
+                            } else {
+                                // No move no action (?)
+                            }
                             
                             let target = self.layout[x][y].get_passer().unwrap()
                               .get_seat().unwrap();

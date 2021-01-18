@@ -1,6 +1,8 @@
 use std::fmt;
 use super::person::Person;
 
+const PASS_WAIT: u8 = 0;
+
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub enum Variant {
     Aisle,
@@ -83,6 +85,16 @@ impl Tile {
         match self.allowing {
             Some(_) => true,
             None => false,
+        }
+    }
+
+    pub fn pass_count(&mut self) -> bool {
+        if self.pass_counter >= PASS_WAIT {
+            self.pass_counter = 0;
+            return true;
+        } else {
+            self.pass_counter = self.pass_counter + 1;
+            return false;
         }
     }
 

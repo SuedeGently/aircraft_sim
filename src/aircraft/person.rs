@@ -32,7 +32,6 @@ impl Person {
 
     // pub fn check_for_delay(&self) -> Option<Behaviour> {
 
-
     pub fn get_name(&self) -> String {
         self.name.to_string()
     }
