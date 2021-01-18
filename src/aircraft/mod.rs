@@ -2,6 +2,8 @@ pub mod tile;
 pub mod person;
 
 
+use simple_logger::SimpleLogger;
+
 use tile::{Tile, Variant, SimpleTile};
 use person::{Person, Behaviour};
 
@@ -13,6 +15,8 @@ pub struct Aircraft {
 
 impl Aircraft {
     pub fn new(x: u16, y: u16) -> Aircraft {
+        log::info!("Initialising aircraft with size {},{}", x, y);
+
         let mut aircraft = Aircraft {
             size: (x, y),
             layout: Vec::<Vec<Tile>>::new(),
@@ -88,23 +92,23 @@ impl Aircraft {
             ] {
                 let (dest_x, dest_y) = (i as f32 + (potential_move.1).0, j as f32 + (potential_move.1).1);
                 let (dest_x, dest_y) = (dest_x as usize, dest_y as usize);
-                println!("Checking {},{}", dest_x, dest_y);
+                // println!("Checking {},{}", dest_x, dest_y);
                 let new_distance = ((target_seat.0 as f32 - dest_x as f32).abs() + (target_seat.1 as f32 - dest_y as f32).abs());
 
                 if new_distance < current_move.1 {
                     // Check whether desired seat is occupied
                     if !self.layout[dest_x][dest_y].is_occupied() || (dest_x, dest_y) == (i, j) {
                         current_move = (potential_move.0, new_distance);
-                        println!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
+                        log::info!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
                     } else if !self.layout[dest_x][dest_y].is_allowing() {
                         current_move = (potential_move.0, new_distance);
-                        println!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
+                        log::info!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
                     } else {
-                        println!("No room to get past");
-                        println!("REJECTED: {:?} x {}", potential_move.0, new_distance);
+                        log::info!("No room to get past");
+                        log::info!("REJECTED: {:?} x {}", potential_move.0, new_distance);
                     }
                 } else {
-                    println!("REJECTED: {:?} x {}", potential_move.0, new_distance);
+                    log::info!("REJECTED: {:?} x {}", potential_move.0, new_distance);
                 }
             }
         } else if self.layout[i][j].get_variant() == Variant::Seat {
@@ -119,9 +123,9 @@ impl Aircraft {
 
                 if new_distance < current_move.1 {
                     current_move = (potential_move.0, new_distance);
-                    println!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
+                    log::info!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
                 } else {
-                    println!("REJECTED: {:?} x {}", potential_move.0, new_distance);
+                    log::info!("REJECTED: {:?} x {}", potential_move.0, new_distance);
                 }
             }
         }
@@ -146,7 +150,7 @@ impl Aircraft {
                                 self.determine_move(x, y, target.0, target.1);
 
                             if current_move.0 != Behaviour::Wait {
-                                println!("Passenger moved: {:?}",current_move.0);
+                                log::info!("Passenger moved: {:?}",current_move.0);
 
                                 let coords = match current_move.0 {
                                     Behaviour::Move_North => (x, y - 1),
@@ -154,8 +158,8 @@ impl Aircraft {
                                     Behaviour::Move_East => (x + 1, y),
                                     Behaviour::Move_West => (x - 1, y),
                                     _ => {
-                                        log::warn!("Impossible movement! Waiting instead.");
-                                        Behaviour::Wait
+                                        log::warn!("Impossible move selected; waiting instead");
+                                        (x, y)
                                     },
                                 };
                                 
@@ -170,10 +174,10 @@ impl Aircraft {
                                     self.layout[coords.0][coords.1]
                                       .pass_in(person.unwrap());
                                 } else {
-                                    println!("Wait");
+                                    log::info!("Passenger Waited");
                                 }
                             } else {
-                                println!("Passenger waited");
+                                log::info!("Passenger waited");
                             }
                         }
                         
@@ -187,7 +191,7 @@ impl Aircraft {
                             
 
                             if current_move.0 != Behaviour::Wait {
-                                println!("Passenger moved: {:?}",current_move.0);
+                                log::info!("Passenger moved: {:?}",current_move.0);
 
                                 if current_move.0 == Behaviour::Wait {
                                     // Do nothing
@@ -213,11 +217,11 @@ impl Aircraft {
                                         self.layout[coords.0][coords.1]
                                           .pass_in(person);
                                     } else {
-                                        println!("Wait");
+                                        log::info!("Passenger waited");
                                     }
                                 }
                             } else {
-                                println!("Passenger waited");
+                                log::info!("Passenger waited");
                             }
                         }
                         
@@ -225,13 +229,12 @@ impl Aircraft {
                         && self.passengers.len() > 0 {
                             self.layout[x][y]
                                 .occupy(self.passengers.pop().unwrap());
-                            println!("Added passenger");
+                            log::info!("Added passenger");
                         }
                 }
             }
         }
         self.reset();
-        println!("END_OF_UPDATE_____________________________");
     }
 
     pub fn reset(&mut self) {
