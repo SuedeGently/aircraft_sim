@@ -157,7 +157,10 @@ impl Aircraft {
                                     Behaviour::Move_South => (x, y + 1),
                                     Behaviour::Move_East => (x + 1, y),
                                     Behaviour::Move_West => (x - 1, y),
-                                    _ => panic!("Impossible movement"),
+                                    _ => {
+                                        log::warn!("Impossible move selected; waiting instead");
+                                        (x, y)
+                                    },
                                 };
                                 
                                 if !self.layout[coords.0][coords.1]
