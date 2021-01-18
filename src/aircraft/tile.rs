@@ -13,7 +13,7 @@ pub struct Tile {
     variant: Variant,
     occupier: Option<Person>,
     updated: bool,
-    allowing_to_pass: bool,
+    pass_counter: u8,
     allowing: Option<Person>,
 }
 
@@ -23,7 +23,7 @@ impl Tile {
             variant: Variant::Aisle,
             occupier: None,
             updated: false,
-            allowing_to_pass: false,
+            pass_counter: 0,
             allowing: None,
         }
     }
@@ -33,7 +33,7 @@ impl Tile {
             variant: Variant::Seat,
             occupier: None,
             updated: false,
-            allowing_to_pass: false,
+            pass_counter: 0,
             allowing: None,
         }
     }
@@ -43,7 +43,7 @@ impl Tile {
             variant: Variant::Entrance,
             occupier: None,
             updated: false,
-            allowing_to_pass: false,
+            pass_counter: 0,
             allowing: None,
         }
     }
@@ -53,7 +53,7 @@ impl Tile {
             variant: Variant::None,
             occupier: None,
             updated: false,
-            allowing_to_pass: false,
+            pass_counter: 0,
             allowing: None,
         }
     }
@@ -65,12 +65,10 @@ impl Tile {
 
     pub fn pass_in(&mut self, p: Person) {
         self.allowing = Some(p);
-        self.allowing_to_pass = true;
     }
 
     pub fn pass_out(&mut self) -> Person {
         let person = self.allowing.take();
-        self.allowing_to_pass = false;
         return person.unwrap();
     }
 
@@ -82,7 +80,10 @@ impl Tile {
     }
 
     pub fn is_allowing(&self) -> bool {
-        self.allowing_to_pass
+        match self.allowing {
+            Some(_) => true,
+            None => false,
+        }
     }
 
     pub fn get_variant(&self) -> Variant {
