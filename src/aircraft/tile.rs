@@ -115,6 +115,10 @@ impl Tile {
         self.allowing.as_ref()
     }
 
+    pub fn get_passer_as_mut(&mut self) -> Option<&mut Person> {
+        return self.allowing.as_mut();
+    }
+
     pub fn has_updated(&self) -> bool {
         self.updated
     }

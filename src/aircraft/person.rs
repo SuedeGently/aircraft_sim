@@ -9,7 +9,7 @@ pub enum Behaviour {
     Move_South,
     Move_East,
     Move_West,
-    Stow_Bag,
+    Stow,
     Wait,
 }
 
