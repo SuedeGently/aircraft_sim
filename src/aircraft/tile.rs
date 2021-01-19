@@ -107,6 +107,10 @@ impl Tile {
         return self.occupier.as_ref();
     }
 
+    pub fn get_occupier_as_mut(&mut self) -> Option<&mut Person> {
+        return self.occupier.as_mut();
+    }
+
     pub fn get_passer(&self) -> Option<&Person> {
         self.allowing.as_ref()
     }

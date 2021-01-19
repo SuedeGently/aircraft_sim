@@ -16,6 +16,7 @@ pub enum Behaviour {
 pub struct Person {
     name: String,
     seat: Option<(u16, u16)>,
+    baggage: bool,
 }
 
 impl Person {
@@ -23,6 +24,7 @@ impl Person {
         Person {
             name: n.to_string(),
             seat: None,
+            baggage: false,
         }
     }
 
@@ -30,7 +32,20 @@ impl Person {
         self.seat = Some((x, y));
     }
 
+    pub fn remove_baggage(&mut self) {
+        if self.baggage {
+            log::info!("Removing baggage");
+            self.baggage = false;
+        } else {
+            log::warn!("Invalid call to `remove_baggage()`");
+        }
+    }
+
     // pub fn check_for_delay(&self) -> Option<Behaviour> {
+
+    pub fn has_baggage(&self) -> bool {
+        self.baggage
+    }
 
     pub fn get_name(&self) -> String {
         self.name.to_string()

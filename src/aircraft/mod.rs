@@ -162,6 +162,15 @@ impl Aircraft {
                                         (x, y)
                                     },
                                 };
+
+                                // If on correct row, consider stowing baggage.
+                                if coords.1 as u16 == target.1 {
+                                    if self.layout[x][y].get_occupier().unwrap().has_baggage() {
+                                        log::info!("Passenger is stowing baggage; resetting behaviour to wait");
+                                        self.layout[x][y].get_occupier_as_mut().unwrap().remove_baggage();
+                                        // TODO: Delay
+                                    }
+                                }
                                 
                                 if !self.layout[coords.0][coords.1]
                                   .is_occupied() {
