@@ -181,15 +181,8 @@ impl Aircraft {
                             }
                         }
                         
-                        if self.layout[x][y].is_allowing() {
+                        if self.layout[x][y].is_allowing() && self.layout[x][y].pass_count() {
                             // Choose movement
-
-                            if self.layout[x][y].pass_count() {
-                                log::info!("Moved");
-                            } else {
-                                // No move no action (?)
-                            }
-                            
                             let target = self.layout[x][y].get_passer().unwrap()
                               .get_seat().unwrap();
                             let current_move = 
@@ -466,9 +459,9 @@ mod tests {
         aircraft.add_passenger(passenger);
 
         for _ in 0..10 {
-            aircraft.ascii_render();
             println!("========================");
             aircraft.update();
+            aircraft.ascii_render();
         }
 
         assert!(aircraft.layout[0][0].is_occupied());
