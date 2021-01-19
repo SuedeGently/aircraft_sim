@@ -58,6 +58,10 @@ impl Person {
     pub fn set_name(&mut self, n: &str) {
         self.name = n.to_string();
     }
+
+    pub fn set_baggage(&mut self, t: bool) {
+        self.baggage = t;
+    }
 }
 
 impl fmt::Debug for Person {

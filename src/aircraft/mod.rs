@@ -143,6 +143,8 @@ impl Aircraft {
                     self.layout[x][y].get_variant() == Variant::Seat ) {
                         // Check whether current tile is occupied
                         if self.layout[x][y].get_occupier().is_some() {
+                            println!("DEBUG: {:?}", self.layout[x][y].get_occupier().unwrap().has_baggage());
+
                             // Choose movement
                             let target = self.layout[x][y].get_occupier()
                                 .unwrap().get_seat().unwrap();
@@ -152,24 +154,29 @@ impl Aircraft {
                             if current_move.0 != Behaviour::Wait {
                                 log::info!("Passenger moved: {:?}",current_move.0);
 
-                                let coords = match current_move.0 {
+                                let mut coords = match current_move.0 {
                                     Behaviour::Move_North => (x, y - 1),
                                     Behaviour::Move_South => (x, y + 1),
                                     Behaviour::Move_East => (x + 1, y),
                                     Behaviour::Move_West => (x - 1, y),
                                     _ => {
                                         log::warn!("Impossible move selected; waiting instead");
-                                        (x, y)
+                                        (x, y) // May be slightly buggy
                                     },
                                 };
 
                                 // If on correct row, consider stowing baggage.
                                 if coords.1 as u16 == target.1 {
+                                    println!("Checking passenger baggage... {:?}", self.layout[x][y].get_occupier().unwrap().has_baggage());
                                     if self.layout[x][y].get_occupier().unwrap().has_baggage() {
-                                        log::info!("Passenger is stowing baggage; resetting behaviour to wait");
+                                        println!("Passenger is stowing baggage; resetting behaviour to wait");
                                         self.layout[x][y].get_occupier_as_mut().unwrap().remove_baggage();
-                                        // TODO: Delay
+                                        coords = (x, y);
+                                    } else {
+                                        println!("Passenger is not stowing baggage");
                                     }
+                                } else {
+                                    println!("Not in position to stow");
                                 }
                                 
                                 if !self.layout[coords.0][coords.1]
@@ -509,5 +516,37 @@ mod tests {
                 assert!(aircraft.layout[*j][i].is_occupied());
             }
         }
+    }
+
+    #[test]
+    fn baggage() {
+        let mut aircraft = Aircraft::new(5,5);
+        
+        for i in 0..5 {
+            for j in &[0,1,3,4] {
+                aircraft.layout[*j][i] = Tile::seat();
+            }
+        }
+        aircraft.layout[2][4] = Tile::entrance();
+
+        let mut person = Person::new("DEFAULT");
+        person.target_seat(1,0);
+        person.set_baggage(true);
+        aircraft.add_passenger(person);
+
+        let mut person = Person::new("DEFAULT");
+        person.target_seat(0,0);
+        person.set_baggage(true);
+        aircraft.add_passenger(person);
+
+
+
+        for _ in 0..20 {
+            aircraft.ascii_render();
+            println!("==========");
+            aircraft.update();
+        }
+
+        panic!("Unfinished");
     }
 }

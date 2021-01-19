@@ -124,11 +124,7 @@ impl Tile {
     }
 
     pub fn free(&mut self) -> Option<Person> {
-        let mut occupier = Person::new(&self.occupier.as_ref().unwrap().get_name());
-        let target_seat = self.occupier.as_ref().unwrap().get_seat().unwrap();
-        occupier.target_seat(target_seat.0, target_seat.1);
-        self.occupier = None;
-        return Some(occupier);
+        self.occupier.take()
     }
 }
 
