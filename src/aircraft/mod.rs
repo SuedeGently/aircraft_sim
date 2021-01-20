@@ -528,25 +528,24 @@ mod tests {
             }
         }
         aircraft.layout[2][4] = Tile::entrance();
-
-        let mut person = Person::new("DEFAULT");
-        person.target_seat(1,0);
-        person.set_baggage(true);
-        aircraft.add_passenger(person);
-
+        
         let mut person = Person::new("DEFAULT");
         person.target_seat(0,0);
         person.set_baggage(true);
         aircraft.add_passenger(person);
 
-
-
-        for _ in 0..20 {
-            aircraft.ascii_render();
-            println!("==========");
+        for _ in 0..7 {
             aircraft.update();
+            println!("==========");
+            aircraft.ascii_render();
         }
 
-        panic!("Unfinished");
+        assert_eq!(aircraft.layout[0][0].is_occupied(), false);
+
+        aircraft.update();
+        println!("==========");
+        aircraft.ascii_render();
+
+        assert!(aircraft.layout[0][0].is_occupied());
     }
 }
