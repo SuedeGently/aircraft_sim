@@ -14,6 +14,11 @@ fn test() {
     log::warn!("Hmm");
 }
 
+fn check_if_complete(aircraft: Aircraft, passenger_list: Vec<Person>) -> bool {
+    // TODO: Implement
+    panic!("Not implemented");
+}
+
 fn main() {
     SimpleLogger::new().init().unwrap();
     log::info!("Initialised logger");
