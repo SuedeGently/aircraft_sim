@@ -252,6 +252,20 @@ impl Aircraft {
         self.reset();
     }
 
+    pub fn check_if_complete(&self, list: Vec<Person>) -> bool {
+        let mut complete: bool = true;
+        for passenger in list {
+            let target = passenger.get_seat();
+            if target.is_some() {
+                let target = target.unwrap();
+                if !self.layout[target.0 as usize][target.1 as usize].is_occupied() {
+                    complete = false;
+                }
+            }
+        }
+        return complete;
+    }
+
     pub fn reset(&mut self) {
         for i in 0..self.size.0 as usize {
             for j in 0..self.size.1 as usize {
@@ -547,5 +561,35 @@ mod tests {
         aircraft.ascii_render();
 
         assert!(aircraft.layout[0][0].is_occupied());
+    }
+
+    #[test]
+    fn test_is_complete() {
+        let mut aircraft = Aircraft::new(5,5);
+        
+        for i in 0..5 {
+            for j in &[0,1,3,4] {
+                aircraft.layout[*j][i] = Tile::seat();
+            }
+        }
+        aircraft.layout[2][4] = Tile::entrance();
+
+        let mut passengers = Vec::<Person>::new();
+        for i in &[0,1,3,4] {
+            let mut passenger = Person::new("DEFAULT");
+            passenger.target_seat(*i, 0);
+            passengers.push(passenger);
+
+            let mut passenger = Person::new("DEFAULT");
+            passenger.target_seat(*i, 0);
+            aircraft.add_passenger(passenger);
+        }
+
+        for _ in 0..15 {
+            aircraft.ascii_render();
+            aircraft.update();
+        }
+
+        panic!("Unfinished");
     }
 }
