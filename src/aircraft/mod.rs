@@ -252,7 +252,7 @@ impl Aircraft {
         self.reset();
     }
 
-    pub fn check_if_complete(&self, list: Vec<Person>) -> bool {
+    pub fn is_complete(&self, list: Vec<Person>) -> bool {
         let mut complete: bool = true;
         for passenger in list {
             let target = passenger.get_seat();
@@ -588,6 +588,7 @@ mod tests {
         for _ in 0..15 {
             aircraft.ascii_render();
             aircraft.update();
+            println!("Status is: {}", aircraft.is_complete());
         }
 
         panic!("Unfinished");

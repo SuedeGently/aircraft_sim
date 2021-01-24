@@ -128,7 +128,12 @@ impl Tile {
     }
 
     pub fn free(&mut self) -> Option<Person> {
-        self.occupier.take()
+        let person = self.occupier.take();
+        if self.allowing.is_some() {
+            let passer = self.pass_out();
+            self.occupier = Some(passer);
+        }
+        return person;
     }
 }
 
