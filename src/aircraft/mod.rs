@@ -11,6 +11,7 @@ pub struct Aircraft {
     size: (u16, u16),
     layout: Vec<Vec<Tile>>,
     passengers: Vec<Person>,
+    targeted_seats: Vec<(u16,u16)>,
 }
 
 impl Aircraft {
@@ -21,6 +22,7 @@ impl Aircraft {
             size: (x, y),
             layout: Vec::<Vec<Tile>>::new(),
             passengers: Vec::<Person>::new(),
+            targeted_seats: Vec::<(u16,u16)>::new(),
         };
         aircraft.clear();
         return aircraft;
@@ -48,6 +50,10 @@ impl Aircraft {
     }
 
     pub fn add_passenger(&mut self, p: Person) {
+        let seat = p.get_seat();
+        if seat.is_some() {
+            self.targeted_seats.push(seat.unwrap());
+        }
         self.passengers.push(p);
     }
 
@@ -252,15 +258,12 @@ impl Aircraft {
         self.reset();
     }
 
-    pub fn is_complete(&self, list: Vec<Person>) -> bool {
+    pub fn is_complete(&self) -> bool {
         let mut complete: bool = true;
-        for passenger in list {
-            let target = passenger.get_seat();
-            if target.is_some() {
-                let target = target.unwrap();
-                if !self.layout[target.0 as usize][target.1 as usize].is_occupied() {
-                    complete = false;
-                }
+        for targeted_seat in &self.targeted_seats {
+            let (x, y) = targeted_seat;
+            if !self.layout[*x as usize][*y as usize].is_occupied() {
+                complete = false;
             }
         }
         return complete;
@@ -322,6 +325,7 @@ mod tests {
             size: (5, 5),
             layout: Vec::<Vec<Tile>>::new(),
             passengers: Vec::<Person>::new(),
+            targeted_seats: Vec::<(u16,u16)>::new(),
         };
 
         aircraft.clear();
@@ -590,7 +594,7 @@ mod tests {
             aircraft.update();
             println!("Status is: {}", aircraft.is_complete());
         }
-
-        panic!("Unfinished");
+        
+        assert!(aircraft.is_complete(), "Not all passengers reached their seats(?)");
     }
 }
