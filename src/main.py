@@ -21,15 +21,13 @@ class Application(tk.Frame):
         self.master = master
 
     def createAircraft(self):
-        self.config = self.layoutEntry.get()
-        self.aircraft = aircraft_sim.PyAircraft(self.config)
+        self.layoutFile = self.layoutEntry.get()
+        # self.aircraft = aircraft_sim.PyAircraft(self.layoutFile, "./config/test_passengers.csv")
+        self.aircraft = aircraft_sim.PyAircraft("./config/test_layout.csv", "./config/test_passengers.csv") # For debug _ONLY_
+        self.aircraft.initialise_logger()
         self.size = self.aircraft.get_size()
         self.layoutEntry.destroy()
         self.layoutConfirm.destroy()
-        self.aircraft.test(0,0)
-        self.aircraft.test(1,0)
-        self.aircraft.test(4,0)
-        self.aircraft.test(3,0)
         self.initCanvas()
 
     def initCanvas(self):

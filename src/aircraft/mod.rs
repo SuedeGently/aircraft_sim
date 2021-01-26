@@ -153,7 +153,7 @@ impl Aircraft {
                     self.layout[x][y].get_variant() == Variant::Seat ) {
                         // Check whether current tile is occupied
                         if self.layout[x][y].get_occupier().is_some() {
-                            println!("DEBUG: {:?}", self.layout[x][y].get_occupier().unwrap().has_baggage());
+                            log::trace!("DEBUG: {:?}", self.layout[x][y].get_occupier().unwrap().has_baggage());
 
                             // Choose movement
                             let target = self.layout[x][y].get_occupier()
@@ -192,7 +192,6 @@ impl Aircraft {
                             } else if current_move.0 == Behaviour::Stow {
                                 log::info!("Passenger stowed");
                                 self.layout[x][y].get_occupier_as_mut().unwrap().remove_baggage();
-                                println!("DEBUG: STOWING");
                             } else {
                                 log::info!("Passenger waited");
                             }
@@ -209,34 +208,31 @@ impl Aircraft {
 
                             if current_move.0 != Behaviour::Wait && current_move.0 != Behaviour::Stow {
                                 log::info!("Passenger moved: {:?}",current_move.0);
-
-                                if current_move.0 == Behaviour::Wait {
-                                    // Do nothing
-                                } else {
-                                    let coords = match current_move.0 {
-                                        Behaviour::Move_North => (x, y - 1),
-                                        Behaviour::Move_South => (x, y + 1),
-                                        Behaviour::Move_East => (x + 1, y),
-                                        Behaviour::Move_West => (x - 1, y),
-                                        _ => panic!("Impossible movement"), //TODO: Replace with log
-                                    };
                                     
-                                    if !self.layout[coords.0][coords.1]
-                                      .is_occupied() {
-                                        let person = self.layout[x][y]
-                                          .pass_out();
-                                        self.layout[coords.0][coords.1]
-                                          .occupy(person);
-                                    } else if !self.layout[coords.0][coords.1]
-                                      .is_allowing() {
-                                        let person =
-                                          self.layout[x][y].pass_out();
-                                        self.layout[coords.0][coords.1]
-                                          .pass_in(person);
-                                    } else {
-                                        log::info!("Passenger waited");
-                                    }
+                                let coords = match current_move.0 {
+                                    Behaviour::Move_North => (x, y - 1),
+                                    Behaviour::Move_South => (x, y + 1),
+                                    Behaviour::Move_East => (x + 1, y),
+                                    Behaviour::Move_West => (x - 1, y),
+                                    _ => panic!("Impossible movement"), //TODO: Replace with log
+                                };
+                                
+                                if !self.layout[coords.0][coords.1]
+                                  .is_occupied() {
+                                    let person = self.layout[x][y]
+                                      .pass_out();
+                                    self.layout[coords.0][coords.1]
+                                      .occupy(person);
+                                } else if !self.layout[coords.0][coords.1]
+                                  .is_allowing() {
+                                    let person =
+                                      self.layout[x][y].pass_out();
+                                    self.layout[coords.0][coords.1]
+                                      .pass_in(person);
+                                } else {
+                                    log::info!("Passenger waited");
                                 }
+                                
                             } else if current_move.0 == Behaviour::Stow {
                                 log::info!("Stowed");
                                 self.layout[x][y].get_passer_as_mut().unwrap().remove_baggage();

@@ -28,13 +28,28 @@ struct PyAircraft {
 #[pymethods]
 impl PyAircraft {
     #[new]
-    fn new(filepath: &str) -> Self {
-        let paircraft = config::read_layout(Path::new(filepath)).unwrap();
+    fn new(layout: &str, passengers: &str) -> Self {
+        let paircraft = config::read_layout(Path::new(layout)).unwrap();
+        let ppassengers = config::read_passengers(Path::new(passengers)).unwrap();
 
-        PyAircraft{
+        let mut aircraft = PyAircraft{
             size: paircraft.get_size().0,
             aircraft: paircraft,
+        };
+
+        for i in ppassengers {
+            aircraft.aircraft.add_passenger(i);
         }
+
+        return aircraft;
+    }
+
+    #[staticmethod]
+    fn initialise_logger() -> PyResult<()> {
+        SimpleLogger::new().init().expect("Failed to initialise logger");
+        log::info!("Initialised logging");
+
+        Ok(())
     }
     
     fn get_values(&self) -> Vec<Vec<u8>> {
@@ -120,11 +135,8 @@ mod tests {
             .expect("Failed to read passenger list");
 
         for i in passengers {
-            println!("Adding passenger: {}", i[0]);
-            let mut passenger = Person::new(&i[0]);
-            passenger.target_seat(i[1].parse().expect("Invalid coord"),
-                                  i[2].parse().expect("Invalid coord"));
-            aircraft.add_passenger(passenger);
+            println!("Adding passenger: {}", i.get_name());
+            aircraft.add_passenger(i);
         }
 
         for _ in 0..15 {
