@@ -10,6 +10,7 @@ class Application(tk.Frame):
 
         self.seatImage = tk.PhotoImage(file="./images/seat.png")
         self.passImage = tk.PhotoImage(file="./images/pass.png")
+        self.alloImage = tk.PhotoImage(file="./images/allo.png")
 
         self.layoutEntry = tk.Entry(self.master)
         self.layoutConfirm = tk.Button(self.master, text="Confirm file", command=self.createAircraft)
@@ -27,8 +28,8 @@ class Application(tk.Frame):
         self.layoutConfirm.destroy()
         self.aircraft.test(0,0)
         self.aircraft.test(1,0)
-        self.aircraft.test(3,0)
         self.aircraft.test(4,0)
+        self.aircraft.test(3,0)
         self.initCanvas()
 
     def initCanvas(self):
@@ -55,8 +56,10 @@ class Application(tk.Frame):
         y = 0
         for row in self.aircraft.get_occupancy():
             for occupied in row:
-                if occupied:
+                if occupied > 0:
                     self.canvas.create_image(x,y,anchor=tk.NW,image=self.passImage)
+                if occupied > 1:
+                    self.canvas.create_image(x,y,anchor=tk.NW,image=self.alloImage)
                 x += 25
             x = 0
             y += 25

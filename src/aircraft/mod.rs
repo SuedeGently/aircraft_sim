@@ -317,6 +317,10 @@ impl Aircraft {
     pub fn check_if_occupied(&self, x: u16, y: u16) -> bool {
         self.layout[x as usize][y as usize].is_occupied()
     }
+
+    pub fn check_if_allowing(&self, x: u16, y: u16) -> bool {
+        self.layout[x as usize][y as usize].is_allowing()
+    }
 }
 
 #[cfg(test)]

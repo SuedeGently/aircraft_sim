@@ -54,12 +54,19 @@ impl PyAircraft {
         return values;
     }
 
-    fn get_occupancy(&self) -> Vec<Vec<bool>> {
-        let mut values = Vec::<Vec<bool>>::new();
+    fn get_occupancy(&self) -> Vec<Vec<u8>> {
+        let mut values = Vec::<Vec<u8>>::new();
         for y in 0..self.size {
-            let mut row = Vec::<bool>::new();
+            let mut row = Vec::<u8>::new();
             for x in 0..self.size {
-                row.push(self.aircraft.check_if_occupied(x,y));
+                let mut occupancy: u8 = 0;
+                if self.aircraft.check_if_occupied(x,y) {
+                    occupancy += 1;
+                }
+                if self.aircraft.check_if_allowing(x,y) {
+                    occupancy += 1;
+                }
+                row.push(occupancy);
             }
             values.push(row);
         }
