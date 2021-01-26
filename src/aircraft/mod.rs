@@ -243,7 +243,8 @@ impl Aircraft {
                         }
                         
                         if self.layout[x][y].get_variant() == Variant::Entrance
-                        && self.passengers.len() > 0 {
+                        && self.passengers.len() > 0
+                        && !self.layout[x][y].is_occupied() {
                             self.layout[x][y]
                                 .occupy(self.passengers.pop().unwrap());
                             log::info!("Added passenger");
@@ -590,6 +591,33 @@ mod tests {
 
             let mut passenger = Person::new("DEFAULT");
             passenger.target_seat(*i, 0);
+            aircraft.add_passenger(passenger);
+        }
+
+        for _ in 0..15 {
+            aircraft.ascii_render();
+            aircraft.update();
+            println!("Status is: {}", aircraft.is_complete());
+        }
+        
+        assert!(aircraft.is_complete(), "Not all passengers reached their seats(?)");
+    }
+
+    #[test]
+    fn advanced_stowing() {
+        let mut aircraft = Aircraft::new(5,5);
+        
+        for i in 0..5 {
+            for j in &[0,1,3,4] {
+                aircraft.layout[*j][i] = Tile::seat();
+            }
+        }
+        aircraft.layout[2][4] = Tile::entrance();
+
+        for i in &[(0,0), (4,4)] {
+            let mut passenger = Person::new("DEFAULT");
+            passenger.target_seat(i.0, i.1);
+            passenger.set_baggage(true);
             aircraft.add_passenger(passenger);
         }
 
