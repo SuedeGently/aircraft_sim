@@ -11,23 +11,45 @@ class Application(tk.Frame):
         self.seatImage = tk.PhotoImage(file="./images/seat.png")
         self.passImage = tk.PhotoImage(file="./images/pass.png")
         self.alloImage = tk.PhotoImage(file="./images/allo.png")
+        
+        self.frame = tk.Frame(self.master)
+        
+        self.layoutFrame = tk.Frame(self.frame)
+        self.layoutLabel = tk.Label(master=self.layoutFrame, text="Layout file:")
+        self.layoutEntry = tk.Entry(self.layoutFrame)
+        
+        self.passengerFrame = tk.Frame(self.frame)
+        self.passengerLabel = tk.Label(self.passengerFrame, text="Pasengers file:")
+        self.passengerEntry = tk.Entry(self.passengerFrame)
 
-        self.layoutEntry = tk.Entry(self.master)
-        self.layoutConfirm = tk.Button(self.master, text="Confirm file", command=self.createAircraft)
+        self.layoutConfirm = tk.Button(self.frame,
+                text="Confirm file",
+                command=self.createAircraft)
 
+        self.frame.pack()
+        self.layoutFrame.pack()
+        self.layoutLabel.pack(side=tk.LEFT)
         self.layoutEntry.pack()
+        self.passengerFrame.pack()
+        self.passengerLabel.pack(side=tk.LEFT)
+        self.passengerEntry.pack()
         self.layoutConfirm.pack()
+
+
+
 
         self.master = master
 
     def createAircraft(self):
         self.layoutFile = self.layoutEntry.get()
-        # self.aircraft = aircraft_sim.PyAircraft(self.layoutFile, "./config/test_passengers.csv")
+        self.passengerFile = self.passengerEntry.get()
+        # self.aircraft = aircraft_sim.PyAircraft(self.layoutFile, self.passengerFile)
         self.aircraft = aircraft_sim.PyAircraft("./config/test_layout.csv", "./config/test_passengers.csv") # For debug _ONLY_
         self.aircraft.initialise_logger()
         self.size = self.aircraft.get_size()
-        self.layoutEntry.destroy()
-        self.layoutConfirm.destroy()
+        
+        self.frame.destroy()
+
         self.initCanvas()
 
     def initCanvas(self):
