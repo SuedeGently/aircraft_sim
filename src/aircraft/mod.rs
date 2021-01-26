@@ -310,6 +310,10 @@ impl Aircraft {
         (self.size.0, self.size.1)
     }
 
+    pub fn get_tile_variant(&self, x: u16, y: u16) -> Variant {
+        self.layout[x as usize][y as usize].get_variant()
+    }
+
     pub fn check_if_occupied(&self, x: u16, y: u16) -> bool {
         self.layout[x as usize][y as usize].is_occupied()
     }

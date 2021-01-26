@@ -6,7 +6,16 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "aircraft_sim"
+# path = "src/lib.rs"
+crate-type = ["cdylib"]
+
 [dependencies]
 log = "0.4"
 simple_logger = "1.11.0"
 csv = "1.1"
+
+[dependencies.pyo3]
+version = "0.12.4"
+features = ["extension-module"]

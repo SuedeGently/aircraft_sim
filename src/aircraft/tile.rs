@@ -13,7 +13,7 @@ pub enum Variant {
 }
 
 pub struct Tile {
-    variant: Variant,
+    pub(crate) variant: Variant,
     occupier: Option<Person>,
     updated: bool,
     pass_counter: u8,
