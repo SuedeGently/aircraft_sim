@@ -105,16 +105,18 @@ impl Aircraft {
                     let new_distance = ((target_seat.0 as f32 - dest_x as f32).abs() + (target_seat.1 as f32 - dest_y as f32).abs());
 
                     if new_distance < current_move.1 {
-                        // Check whether desired seat is occupied
-                        if !self.layout[dest_x][dest_y].is_occupied() || (dest_x, dest_y) == (i, j) {
-                            current_move = (potential_move.0, new_distance);
-                            log::info!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
-                        } else if !self.layout[dest_x][dest_y].is_allowing() {
-                            current_move = (potential_move.0, new_distance);
-                            log::info!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
-                        } else {
-                            log::info!("No room to get past");
-                            log::info!("REJECTED: {:?} x {}", potential_move.0, new_distance);
+                        if !(potential_move.0 == Behaviour::Move_East && dest_y != target_seat.1 as usize) && !(potential_move.0 == Behaviour::Move_West && dest_y != target_seat.1 as usize) {
+                            // Check whether desired seat is occupied
+                            if !self.layout[dest_x][dest_y].is_occupied() || (dest_x, dest_y) == (i, j) {
+                                current_move = (potential_move.0, new_distance);
+                                log::info!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
+                            } else if !self.layout[dest_x][dest_y].is_allowing() {
+                                current_move = (potential_move.0, new_distance);
+                                log::info!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
+                            } else {
+                                log::info!("No room to get past");
+                                log::info!("REJECTED: {:?} x {}", potential_move.0, new_distance);
+                            }
                         }
                     } else {
                         log::info!("REJECTED: {:?} x {}", potential_move.0, new_distance);
