@@ -28,19 +28,21 @@ struct PyAircraft {
 #[pymethods]
 impl PyAircraft {
     #[new]
-    fn new(size: u16) -> Self {
+    fn new(filepath: &str) -> Self {
+        let paircraft = config::read_layout(Path::new(filepath)).unwrap();
+
         PyAircraft{
-            aircraft: Aircraft::new(size, size),
-            size: size,
+            size: paircraft.get_size().0,
+            aircraft: paircraft,
         }
     }
     
     fn get_values(&self) -> Vec<Vec<u8>> {
         let mut values = Vec::<Vec<u8>>::new();
-        for i in 0..self.size {
+        for y in 0..self.size {
             let mut row = Vec::<u8>::new();
-            for j in 0..self.size {
-                row.push(match self.aircraft.get_tile_variant(i,j) {
+            for x in 0..self.size {
+                row.push(match self.aircraft.get_tile_variant(x,y) {
                     Variant::None => 0,
                     Variant::Aisle => 1,
                     Variant::Seat => 2,
@@ -52,10 +54,34 @@ impl PyAircraft {
         return values;
     }
 
-    fn test(&mut self) -> PyResult<()> {
-        for i in 0..self.size {
-            self.aircraft.set_tile(i,i, Variant::Seat);
+    fn get_occupancy(&self) -> Vec<Vec<bool>> {
+        let mut values = Vec::<Vec<bool>>::new();
+        for y in 0..self.size {
+            let mut row = Vec::<bool>::new();
+            for x in 0..self.size {
+                row.push(self.aircraft.check_if_occupied(x,y));
+            }
+            values.push(row);
         }
+        return values;
+    }
+
+
+    fn update(&mut self) -> PyResult<bool> {
+        self.aircraft.update();
+
+        Ok(self.aircraft.is_complete())
+    }
+
+    fn get_size(&self) -> PyResult<u16> {
+        Ok(self.size)
+    }
+
+    fn test(&mut self, x: u16, y: u16) -> PyResult<()> {
+        let mut dave = Person::new("Dave");
+        dave.target_seat(x,y);
+
+        self.aircraft.add_passenger(dave);
 
         Ok(())
     }

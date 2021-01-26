@@ -6,23 +6,29 @@ DEFAULT_SIZE = 4
 class Application(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
-        self.size = tk.StringVar()
+        self.layoutFile = tk.StringVar()
 
         self.seatImage = tk.PhotoImage(file="./images/seat.png")
+        self.passImage = tk.PhotoImage(file="./images/pass.png")
 
-        self.sizeEntry = tk.Entry(self.master, textvariable=self.size)
-        self.sizeConfirm = tk.Button(self.master, text="Confirm size", command=self.createAircraft)
+        self.layoutEntry = tk.Entry(self.master)
+        self.layoutConfirm = tk.Button(self.master, text="Confirm file", command=self.createAircraft)
 
-        self.sizeEntry.pack()
-        self.sizeConfirm.pack()
+        self.layoutEntry.pack()
+        self.layoutConfirm.pack()
 
         self.master = master
 
     def createAircraft(self):
-        self.size = int(self.sizeEntry.get())
-        self.aircraft = aircraft_sim.PyAircraft(self.size)
-        self.sizeEntry.destroy()
-        self.sizeConfirm.destroy()
+        self.config = self.layoutEntry.get()
+        self.aircraft = aircraft_sim.PyAircraft(self.config)
+        self.size = self.aircraft.get_size()
+        self.layoutEntry.destroy()
+        self.layoutConfirm.destroy()
+        self.aircraft.test(0,0)
+        self.aircraft.test(1,0)
+        self.aircraft.test(3,0)
+        self.aircraft.test(4,0)
         self.initCanvas()
 
     def initCanvas(self):
@@ -30,8 +36,10 @@ class Application(tk.Frame):
         self.canvas.pack()
         self.canvasUpdate()
 
-    def canvasUpdate(self):
-        self.aircraft.test()
+    def clearCanvas(self):
+        self.canvas.delete("all")
+
+    def drawLayout(self):
         x = 0
         y = 0
         for row in self.aircraft.get_values():
@@ -41,19 +49,30 @@ class Application(tk.Frame):
                 x += 25
             x = 0
             y += 25
-        self.canvas.after(500, self.canvasUpdate)
 
+    def drawPassengers(self):
+        x = 0
+        y = 0
+        for row in self.aircraft.get_occupancy():
+            for occupied in row:
+                if occupied:
+                    self.canvas.create_image(x,y,anchor=tk.NW,image=self.passImage)
+                x += 25
+            x = 0
+            y += 25
 
-aircraft = aircraft_sim.PyAircraft(4)
+    def canvasUpdate(self):
+        if not self.aircraft.update():
+            self.clearCanvas()
+            self.drawLayout()
+            self.drawPassengers()
+            self.canvas.after(500, self.canvasUpdate)
+        else:
+            self.clearCanvas()
+            self.drawLayout()
+            self.drawPassengers()
+            print("Done.")
 
-for i in aircraft.get_values():
-    print(i)
-
-aircraft.test()
-print()
-
-for i in aircraft.get_values():
-    print(i)
 
 master = tk.Tk()
 app = Application(master=master)
