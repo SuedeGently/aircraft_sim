@@ -1,7 +1,6 @@
 pub mod tile;
 pub mod person;
 
-
 use simple_logger::SimpleLogger;
 
 use tile::{Tile, Variant, SimpleTile};

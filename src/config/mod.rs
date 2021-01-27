@@ -5,6 +5,9 @@ use super::aircraft::Aircraft;
 use super::aircraft::tile::{Tile,Variant};
 use super::aircraft::person::Person;
 
+use rand::thread_rng;
+use rand::seq::SliceRandom;
+
 struct seat_data {
     seat_x: u16,
     seat_y: u16,
@@ -41,6 +44,29 @@ fn str_to_var(var: &str) -> Variant {
         _ => Variant::None, // Shouldn't happen
     }
 }
+
+pub fn random_back_first(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'static str> {
+    // size_y MUST be odd
+    let mut persons = Vec::<Person>::new();
+    let aisle: u16 = size_x / 2;
+
+    for y in 0..size_y {
+    let mut x_coords: Vec<u16> = (0..size_x).collect();
+    x_coords.shuffle(&mut thread_rng());
+        for x in x_coords {
+            if x != aisle {
+                let mut person = Person::new("DEFAULT");
+                person.target_seat(x, y);
+                person.set_baggage(true);
+                persons.push(person);
+            }
+        }
+    }
+
+    Ok(persons)
+}
+
+
 
 pub fn read_passengers(path: &Path) -> Option<Vec<Person>> {
     let mut persons = Vec::<Person>::new();
