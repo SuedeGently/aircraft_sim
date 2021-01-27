@@ -153,4 +153,11 @@ mod tests {
         assert_eq!(str_to_var("none"), Variant::None);
         assert_eq!(str_to_var("invalid"), Variant::None);
     }
+
+    #[test]
+    fn rand_back_first() {
+        let list = random_back_first(5, 10).unwrap();
+
+        assert_eq!(list.len(), 40);
+    }
 }

@@ -139,7 +139,7 @@ mod tests {
             aircraft.add_passenger(i);
         }
 
-        for _ in 0..15 {
+        for _ in 0..30 {
             aircraft.update();
             aircraft.ascii_render();
         }
