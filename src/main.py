@@ -6,6 +6,9 @@ DEFAULT_SIZE = 4
 class Application(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
+
+        self.aircraft = aircraft_sim.PyAircraft()
+
         self.running = False
     
         self.stepsTaken = 0
@@ -76,14 +79,18 @@ class Application(tk.Frame):
         self.running = True
         self.layoutFile = self.layoutEntry.get()
         self.passengerFile = self.passengerEntry.get()
-        self.aircraft = aircraft_sim.PyAircraft(self.layoutFile, self.passengerFile)
-        # self.aircraft = aircraft_sim.PyAircraft("./config/test_layout.csv", "./config/test_passengers.csv") # For debug _ONLY_
-        self.aircraft.initialise_logger()
-        self.size = self.aircraft.get_size()
-        
-        self.interactiveFrame.destroy()
+        try:
+            self.aircraft.init_from_file(self.layoutFile, self.passengerFile)
+            self.aircraft.initialise_logger()
+            self.size = self.aircraft.get_size()
+            
+            self.interactiveFrame.destroy()
 
-        self.initInteractive()
+            self.initInteractive()
+        except:
+            print("Failed to initialise from file")
+        # self.aircraft = aircraft_sim.PyAircraft("./config/test_layout.csv", "./config/test_passengers.csv") # For debug _ONLY_
+
 
     def initInteractive(self):
         self.canvas = tk.Canvas(self.master, bg="blue", width=(self.size*25), height=(self.size*25))

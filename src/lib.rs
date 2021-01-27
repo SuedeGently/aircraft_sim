@@ -3,6 +3,8 @@ mod config;
 
 use pyo3::prelude::*;
 use pyo3::wrap_pyfunction;
+use pyo3::create_exception;
+use pyo3::exceptions::{PyException, PyTypeError};
 
 use std::path::Path;
 
@@ -13,6 +15,8 @@ use aircraft::person::Person;
 use aircraft::tile::Variant;
 use config::{read_layout, read_passengers};
 
+create_exception!(PyAircraft, CustomError, PyException);
+
 #[pyfunction]
 fn test() -> PyResult<String> {
     println!("Printing to console in Rust");
@@ -21,27 +25,18 @@ fn test() -> PyResult<String> {
 
 #[pyclass]
 struct PyAircraft {
-    aircraft: Aircraft,
+    aircraft: Option<Aircraft>,
     size: u16,
 }
 
 #[pymethods]
 impl PyAircraft {
     #[new]
-    fn new(layout: &str, passengers: &str) -> Self {
-        let paircraft = config::read_layout(Path::new(layout)).unwrap();
-        let ppassengers = config::read_passengers(Path::new(passengers)).unwrap();
-
-        let mut aircraft = PyAircraft{
-            size: paircraft.get_size().0,
-            aircraft: paircraft,
-        };
-
-        for i in ppassengers {
-            aircraft.aircraft.add_passenger(i);
+    fn new() -> Self {
+        PyAircraft{
+            size: 0,
+            aircraft: None,
         }
-
-        return aircraft;
     }
 
     #[staticmethod]
@@ -51,22 +46,47 @@ impl PyAircraft {
 
         Ok(())
     }
-    
-    fn get_values(&self) -> Vec<Vec<u8>> {
-        let mut values = Vec::<Vec<u8>>::new();
-        for y in 0..self.size {
-            let mut row = Vec::<u8>::new();
-            for x in 0..self.size {
-                row.push(match self.aircraft.get_tile_variant(x,y) {
-                    Variant::None => 0,
-                    Variant::Aisle => 1,
-                    Variant::Seat => 2,
-                    Variant::Entrance => 3,
-                });
+
+    fn init_from_file(&mut self, layout_path: &str, passengers_path: &str) -> PyResult<()> {
+        if self.aircraft.is_none() {
+            let new_aircraft = read_layout(Path::new(layout_path));
+            let passengers = read_passengers(Path::new(passengers_path));
+            
+            if new_aircraft.is_some() && passengers.is_some() {
+                let mut new_aircraft = new_aircraft.unwrap();
+                for i in passengers.unwrap() {
+                    new_aircraft.add_passenger(i);
+                }
+                self.aircraft = Some(new_aircraft);
+                self.size = self.aircraft.as_ref().unwrap().get_size().0;
+                Ok(())
+            } else {
+                Err(PyTypeError::new_err("Error2"))
             }
-            values.push(row);
+        } else {
+            Err(PyTypeError::new_err("Error2"))
         }
-        return values;
+    }
+    
+    fn get_values(&mut self) -> PyResult<Vec<Vec<u8>>> {
+        if self.aircraft.is_some() {
+            let mut values = Vec::<Vec<u8>>::new();
+            for y in 0..self.size {
+                let mut row = Vec::<u8>::new();
+                for x in 0..self.size {
+                    row.push(match self.aircraft.as_mut().unwrap().get_tile_variant(x,y) {
+                        Variant::None => 0,
+                        Variant::Aisle => 1,
+                        Variant::Seat => 2,
+                        Variant::Entrance => 3,
+                    });
+                }
+                values.push(row);
+            }
+            return Ok(values);
+        } else {
+            return Err(PyTypeError::new_err("Error"));
+        }
     }
 
     fn get_occupancy(&self) -> Vec<Vec<u8>> {
@@ -75,10 +95,12 @@ impl PyAircraft {
             let mut row = Vec::<u8>::new();
             for x in 0..self.size {
                 let mut occupancy: u8 = 0;
-                if self.aircraft.check_if_occupied(x,y) {
+                // TODO: FIX
+                if self.aircraft.as_ref().unwrap().check_if_occupied(x,y) {
                     occupancy += 1;
                 }
-                if self.aircraft.check_if_allowing(x,y) {
+                // TODO: FIX
+                if self.aircraft.as_ref().unwrap().check_if_allowing(x,y) {
                     occupancy += 1;
                 }
                 row.push(occupancy);
@@ -90,9 +112,11 @@ impl PyAircraft {
 
 
     fn update(&mut self) -> PyResult<bool> {
-        self.aircraft.update();
+        // TODO: FIX THIS
+        self.aircraft.as_mut().unwrap().update();
 
-        Ok(self.aircraft.is_complete())
+        // TODO: FIX THIS
+        Ok(self.aircraft.as_ref().unwrap().is_complete())
     }
 
     fn get_size(&self) -> PyResult<u16> {
@@ -103,14 +127,16 @@ impl PyAircraft {
         let mut dave = Person::new("Dave");
         dave.target_seat(x,y);
 
-        self.aircraft.add_passenger(dave);
+        // TODO: FIX THIS
+        self.aircraft.as_mut().unwrap().add_passenger(dave);
 
         Ok(())
     }
 }
 
 #[pymodule]
-fn aircraft_sim(_: Python, m: &PyModule) -> PyResult<()> {
+fn aircraft_sim(py: Python, m: &PyModule) -> PyResult<()> {
+    m.add("CustomError", py.get_type::<CustomError>())?;
     m.add_class::<PyAircraft>()?;
 
     Ok(())
