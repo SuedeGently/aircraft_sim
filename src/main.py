@@ -12,21 +12,26 @@ class Application(tk.Frame):
         self.passImage = tk.PhotoImage(file="./images/pass.png")
         self.alloImage = tk.PhotoImage(file="./images/allo.png")
         
-        self.frame = tk.Frame(self.master)
+        self.interactiveFrame = tk.Frame(self.master)
         
-        self.layoutFrame = tk.Frame(self.frame)
+        self.layoutFrame = tk.Frame(self.interactiveFrame)
         self.layoutLabel = tk.Label(master=self.layoutFrame, text="Layout file:")
         self.layoutEntry = tk.Entry(self.layoutFrame)
         
-        self.passengerFrame = tk.Frame(self.frame)
+        self.passengerFrame = tk.Frame(self.interactiveFrame)
         self.passengerLabel = tk.Label(self.passengerFrame, text="Pasengers file:")
         self.passengerEntry = tk.Entry(self.passengerFrame)
 
-        self.layoutConfirm = tk.Button(self.frame,
+        self.layoutConfirm = tk.Button(self.interactiveFrame,
                 text="Confirm file",
                 command=self.createAircraft)
 
-        self.frame.pack()
+        self.startInteractive()
+
+        self.master = master
+
+    def startInteractive(self):
+        self.interactiveFrame.pack()
         self.layoutFrame.pack()
         self.layoutLabel.pack(side=tk.LEFT)
         self.layoutEntry.pack()
@@ -34,11 +39,6 @@ class Application(tk.Frame):
         self.passengerLabel.pack(side=tk.LEFT)
         self.passengerEntry.pack()
         self.layoutConfirm.pack()
-
-
-
-
-        self.master = master
 
     def createAircraft(self):
         self.layoutFile = self.layoutEntry.get()
@@ -48,7 +48,7 @@ class Application(tk.Frame):
         self.aircraft.initialise_logger()
         self.size = self.aircraft.get_size()
         
-        self.frame.destroy()
+        self.interactiveFrame.destroy()
 
         self.initCanvas()
 
