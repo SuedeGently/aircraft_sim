@@ -11,6 +11,10 @@ class Application(tk.Frame):
         self.seatImage = tk.PhotoImage(file="./images/seat.png")
         self.passImage = tk.PhotoImage(file="./images/pass.png")
         self.alloImage = tk.PhotoImage(file="./images/allo.png")
+
+        self.mainFrame = tk.Frame(self.master)
+
+        self.interButton = tk.Button(self.mainFrame,text="Interactive mode",command=self.startInteractive)
         
         self.interactiveFrame = tk.Frame(self.master)
         
@@ -25,12 +29,17 @@ class Application(tk.Frame):
         self.layoutConfirm = tk.Button(self.interactiveFrame,
                 text="Confirm file",
                 command=self.createAircraft)
+        
+        self.mainFrame.pack()
+        self.interButton.pack()
 
-        self.startInteractive()
+        # self.startInteractive()
 
         self.master = master
 
     def startInteractive(self):
+        self.mainFrame.destroy()
+
         self.interactiveFrame.pack()
         self.layoutFrame.pack()
         self.layoutLabel.pack(side=tk.LEFT)
