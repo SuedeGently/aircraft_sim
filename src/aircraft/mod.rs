@@ -109,17 +109,17 @@ impl Aircraft {
                             // Check whether desired seat is occupied
                             if !self.layout[dest_x][dest_y].is_occupied() || (dest_x, dest_y) == (i, j) {
                                 current_move = (potential_move.0, new_distance);
-                                log::info!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
+                                log::debug!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
                             } else if !self.layout[dest_x][dest_y].is_allowing() {
                                 current_move = (potential_move.0, new_distance);
-                                log::info!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
+                                log::debug!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
                             } else {
-                                log::info!("No room to get past");
-                                log::info!("REJECTED: {:?} x {}", potential_move.0, new_distance);
+                                log::debug!("No room to get past");
+                                log::debug!("REJECTED: {:?} x {}", potential_move.0, new_distance);
                             }
                         }
                     } else {
-                        log::info!("REJECTED: {:?} x {}", potential_move.0, new_distance);
+                        log::debug!("REJECTED: {:?} x {}", potential_move.0, new_distance);
                     }
                 }
             }
@@ -135,9 +135,9 @@ impl Aircraft {
 
                 if new_distance < current_move.1 {
                     current_move = (potential_move.0, new_distance);
-                    log::info!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
+                    log::debug!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
                 } else {
-                    log::info!("REJECTED: {:?} x {}", potential_move.0, new_distance);
+                    log::debug!("REJECTED: {:?} x {}", potential_move.0, new_distance);
                 }
             }
         }
@@ -165,7 +165,7 @@ impl Aircraft {
                                 self.determine_move(x, y, target.0, target.1, baggage);
 
                             if current_move.0 != Behaviour::Wait && current_move.0 != Behaviour::Stow {
-                                log::info!("Passenger moved: {:?}",current_move.0);
+                                log::debug!("Passenger moved: {:?}",current_move.0);
 
                                 let mut coords = match current_move.0 {
                                     Behaviour::Move_North => (x, y - 1),
@@ -189,13 +189,13 @@ impl Aircraft {
                                     self.layout[coords.0][coords.1]
                                       .pass_in(person.unwrap());
                                 } else {
-                                    log::info!("Passenger Waited");
+                                    log::debug!("Passenger Waited");
                                 }
                             } else if current_move.0 == Behaviour::Stow {
-                                log::info!("Passenger stowed");
+                                log::debug!("Passenger stowed");
                                 self.layout[x][y].get_occupier_as_mut().unwrap().remove_baggage();
                             } else {
-                                log::info!("Passenger waited");
+                                log::debug!("Passenger waited");
                             }
                         }
                         
@@ -209,7 +209,7 @@ impl Aircraft {
                             
 
                             if current_move.0 != Behaviour::Wait && current_move.0 != Behaviour::Stow {
-                                log::info!("Passenger moved: {:?}",current_move.0);
+                                log::debug!("Passenger moved: {:?}",current_move.0);
                                     
                                 let coords = match current_move.0 {
                                     Behaviour::Move_North => (x, y - 1),
@@ -232,15 +232,15 @@ impl Aircraft {
                                     self.layout[coords.0][coords.1]
                                       .pass_in(person);
                                 } else {
-                                    log::info!("Passenger waited");
+                                    log::debug!("Passenger waited");
                                 }
                                 
                             } else if current_move.0 == Behaviour::Stow {
-                                log::info!("Stowed");
+                                log::debug!("Stowed");
                                 self.layout[x][y].get_passer_as_mut().unwrap().remove_baggage();
                                 println!("DEBUG: STOWING");
                             } else {
-                                log::info!("Passenger waited");
+                                log::debug!("Passenger waited");
                             }
                         }
                         
