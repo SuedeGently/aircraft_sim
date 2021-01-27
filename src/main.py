@@ -7,8 +7,14 @@ class Application(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.running = False
+    
+        self.stepsTaken = 0
+
         self.pStatus = tk.StringVar()
         self.pStatus.set("Running...")
+        self.strStepsTaken = tk.StringVar()
+        
+
 
         self.seatImage = tk.PhotoImage(file="./images/seat.png")
         self.passImage = tk.PhotoImage(file="./images/pass.png")
@@ -16,7 +22,9 @@ class Application(tk.Frame):
 
         self.mainFrame = tk.Frame(self.master)
 
-        self.interButton = tk.Button(self.mainFrame,text="Interactive mode",command=self.startInteractive)
+        self.interButton = tk.Button(self.mainFrame,
+                                     text="Interactive mode",
+                                     command=self.startInteractive)
         self.massButton = tk.Button(self.mainFrame,text="Mass Mode",command=self.startMass)
 
         self.interactiveFrame = tk.Frame(self.master)
@@ -68,8 +76,8 @@ class Application(tk.Frame):
         self.running = True
         self.layoutFile = self.layoutEntry.get()
         self.passengerFile = self.passengerEntry.get()
-        # self.aircraft = aircraft_sim.PyAircraft(self.layoutFile, self.passengerFile)
-        self.aircraft = aircraft_sim.PyAircraft("./config/test_layout.csv", "./config/test_passengers.csv") # For debug _ONLY_
+        self.aircraft = aircraft_sim.PyAircraft(self.layoutFile, self.passengerFile)
+        # self.aircraft = aircraft_sim.PyAircraft("./config/test_layout.csv", "./config/test_passengers.csv") # For debug _ONLY_
         self.aircraft.initialise_logger()
         self.size = self.aircraft.get_size()
         
@@ -81,11 +89,14 @@ class Application(tk.Frame):
         self.canvas = tk.Canvas(self.master, bg="blue", width=(self.size*25), height=(self.size*25))
         self.pauseButton = tk.Button(self.master,text="Start/Stop",command=self.toggle)
         self.pauseIndicator = tk.Label(self.master,textvariable=self.pStatus)
+        self.stepIndicator = tk.Label(self.master, textvariable=self.strStepsTaken)
 
 
         self.canvas.pack()
-        self.pauseButton.pack()
         self.pauseIndicator.pack()
+        self.pauseButton.pack()
+        self.stepIndicator.pack()
+
 
         self.canvasUpdate()
 
@@ -128,6 +139,8 @@ class Application(tk.Frame):
             self.clearCanvas()
             self.drawLayout()
             self.drawPassengers()
+            self.stepsTaken += 1
+            self.strStepsTaken.set(str(self.stepsTaken))
             if self.running == True:
                 self.canvas.after(500, self.canvasUpdate)
             else:
