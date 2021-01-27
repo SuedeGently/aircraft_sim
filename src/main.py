@@ -6,7 +6,9 @@ DEFAULT_SIZE = 4
 class Application(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
-        self.layoutFile = tk.StringVar()
+        self.running = False
+        self.pStatus = tk.StringVar()
+        self.pStatus.set("Running...")
 
         self.seatImage = tk.PhotoImage(file="./images/seat.png")
         self.passImage = tk.PhotoImage(file="./images/pass.png")
@@ -51,10 +53,19 @@ class Application(tk.Frame):
         self.passengerEntry.pack()
         self.layoutConfirm.pack()
 
+    def toggle(self):
+        if self.running == True:
+            self.running = False
+            self.pStatus.set("Paused")
+        else:
+            self.running = True
+            self.pStatus.set("Running...")
+
     def startMass(self):
         print("Not implemented")
 
     def createAircraft(self):
+        self.running = True
         self.layoutFile = self.layoutEntry.get()
         self.passengerFile = self.passengerEntry.get()
         # self.aircraft = aircraft_sim.PyAircraft(self.layoutFile, self.passengerFile)
@@ -64,11 +75,18 @@ class Application(tk.Frame):
         
         self.interactiveFrame.destroy()
 
-        self.initCanvas()
+        self.initInteractive()
 
-    def initCanvas(self):
+    def initInteractive(self):
         self.canvas = tk.Canvas(self.master, bg="blue", width=(self.size*25), height=(self.size*25))
+        self.pauseButton = tk.Button(self.master,text="Start/Stop",command=self.toggle)
+        self.pauseIndicator = tk.Label(self.master,textvariable=self.pStatus)
+
+
         self.canvas.pack()
+        self.pauseButton.pack()
+        self.pauseIndicator.pack()
+
         self.canvasUpdate()
 
     def clearCanvas(self):
@@ -98,12 +116,22 @@ class Application(tk.Frame):
             x = 0
             y += 25
 
+    def restart(self):
+        if self.running == True:
+            self.canvasUpdate()
+        else:
+            self.canvas.after(100, self.restart)
+
     def canvasUpdate(self):
+        print("Running:", self.running)
         if not self.aircraft.update():
             self.clearCanvas()
             self.drawLayout()
             self.drawPassengers()
-            self.canvas.after(500, self.canvasUpdate)
+            if self.running == True:
+                self.canvas.after(500, self.canvasUpdate)
+            else:
+                self.restart()
         else:
             self.clearCanvas()
             self.drawLayout()
