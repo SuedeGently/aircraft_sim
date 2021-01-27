@@ -15,7 +15,8 @@ class Application(tk.Frame):
         self.mainFrame = tk.Frame(self.master)
 
         self.interButton = tk.Button(self.mainFrame,text="Interactive mode",command=self.startInteractive)
-        
+        self.massButton = tk.Button(self.mainFrame,text="Mass Mode",command=self.startMass)
+
         self.interactiveFrame = tk.Frame(self.master)
         
         self.layoutFrame = tk.Frame(self.interactiveFrame)
@@ -32,6 +33,7 @@ class Application(tk.Frame):
         
         self.mainFrame.pack()
         self.interButton.pack()
+        self.massButton.pack()
 
         # self.startInteractive()
 
@@ -48,6 +50,9 @@ class Application(tk.Frame):
         self.passengerLabel.pack(side=tk.LEFT)
         self.passengerEntry.pack()
         self.layoutConfirm.pack()
+
+    def startMass(self):
+        print("Not implemented")
 
     def createAircraft(self):
         self.layoutFile = self.layoutEntry.get()
