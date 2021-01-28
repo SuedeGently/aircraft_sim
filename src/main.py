@@ -2,6 +2,7 @@
 
 import aircraft_sim
 import tkinter as tk
+from tkinter import messagebox
 
 DEFAULT_SIZE = 11
 
@@ -35,6 +36,12 @@ class Application(tk.Frame):
 
         ## INTERACTIVE MODE MENU ##=============================================
         self.interactiveFrame = tk.Frame(self.master)
+        
+        self.sizeFrame = tk.Frame(self.interactiveFrame)
+        self.sizeLabel = tk.Label(self.sizeFrame,text="Aircraft Proportions:")
+        self.sizeXEntry = tk.Entry(self.sizeFrame,width=2)
+        self.sizeMidLabel = tk.Label(self.sizeFrame,text="x")
+        self.sizeYEntry = tk.Entry(self.sizeFrame,width=2)
 
         self.fileButton = tk.Button(self.interactiveFrame,text="From File",command=self.interactiveFromFile)
         self.backFrontButton = tk.Button(self.interactiveFrame,text="Random back-to-front",command=self.initialiseFromBackFront)
@@ -66,6 +73,11 @@ class Application(tk.Frame):
         self.mainFrame.destroy()
 
         self.interactiveFrame.pack()
+        self.sizeFrame.pack()
+        self.sizeLabel.pack(side=tk.LEFT)
+        self.sizeXEntry.pack(side=tk.LEFT)
+        self.sizeMidLabel.pack(side=tk.LEFT)
+        self.sizeYEntry.pack()
         self.fileButton.pack()
         self.backFrontButton.pack()
 
@@ -107,7 +119,8 @@ class Application(tk.Frame):
         try:
             self.aircraft.init_from_file(self.layoutFile, self.passengerFile)
             self.aircraft.initialise_logger()
-            self.size = self.aircraft.get_size()
+            self.size_x = self.aircraft.get_size_x()
+            self.size_y = self.aircraft.get_size_y()
             
             self.fileFrame.destroy()
 
@@ -119,9 +132,17 @@ class Application(tk.Frame):
     def initialiseFromBackFront(self):
         self.running = True
         try:
-            self.aircraft.init_random_back_front(DEFAULT_SIZE, DEFAULT_SIZE)
+            size_x = int(self.sizeXEntry.get())
+            size_y = int(self.sizeYEntry.get())
+        except:
+            tk.messagebox.showwarning("Invalid Input", "The values you entered were invalid; using default values instead")
+            size_x = DEFAULT_SIZE
+            size_y = DEFAULT_SIZE
+        try:
+            self.aircraft.init_random_back_front(size_x, size_y)
             self.aircraft.initialise_logger()
-            self.size = self.aircraft.get_size()
+            self.size_x = self.aircraft.get_size_x()
+            self.size_y = self.aircraft.get_size_y()
             
             self.interactiveFrame.destroy()
 
@@ -131,7 +152,7 @@ class Application(tk.Frame):
 
 
     def initInteractive(self):
-        self.canvas = tk.Canvas(self.master, bg="blue", width=(self.size*25), height=(self.size*25))
+        self.canvas = tk.Canvas(self.master, bg="blue", width=(self.size_x*25), height=(self.size_y*25))
         self.pauseButton = tk.Button(self.master,text="Start/Stop",command=self.toggle)
         self.pauseIndicator = tk.Label(self.master,textvariable=self.pStatus)
         self.stepIndicator = tk.Label(self.master, textvariable=self.strStepsTaken)

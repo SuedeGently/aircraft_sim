@@ -26,7 +26,7 @@ fn test() -> PyResult<String> {
 #[pyclass]
 struct PyAircraft {
     aircraft: Option<Aircraft>,
-    size: u16,
+    size: (u16, u16),
 }
 
 #[pymethods]
@@ -34,7 +34,7 @@ impl PyAircraft {
     #[new]
     fn new() -> Self {
         PyAircraft{
-            size: 0,
+            size: (0,0),
             aircraft: None,
         }
     }
@@ -58,7 +58,7 @@ impl PyAircraft {
                     new_aircraft.add_passenger(i);
                 }
                 self.aircraft = Some(new_aircraft);
-                self.size = self.aircraft.as_ref().unwrap().get_size().0;
+                self.size = self.aircraft.as_ref().unwrap().get_size();
                 Ok(())
             } else {
                 Err(PyTypeError::new_err("Error2"))
@@ -79,7 +79,7 @@ impl PyAircraft {
                     new_aircraft.add_passenger(i);
                 }
                 self.aircraft = Some(new_aircraft);
-                self.size = size_x;
+                self.size = (size_x,size_y);
                 Ok(())
             } else {
                 Err(PyTypeError::new_err("Error3"))
@@ -92,9 +92,9 @@ impl PyAircraft {
     fn get_values(&mut self) -> PyResult<Vec<Vec<u8>>> {
         if self.aircraft.is_some() {
             let mut values = Vec::<Vec<u8>>::new();
-            for y in 0..self.size {
+            for y in 0..self.size.1 {
                 let mut row = Vec::<u8>::new();
-                for x in 0..self.size {
+                for x in 0..self.size.0 {
                     row.push(match self.aircraft.as_mut().unwrap().get_tile_variant(x,y) {
                         Variant::None => 0,
                         Variant::Aisle => 1,
@@ -112,9 +112,9 @@ impl PyAircraft {
 
     fn get_occupancy(&self) -> Vec<Vec<u8>> {
         let mut values = Vec::<Vec<u8>>::new();
-        for y in 0..self.size {
+        for y in 0..self.size.1 {
             let mut row = Vec::<u8>::new();
-            for x in 0..self.size {
+            for x in 0..self.size.0 {
                 let mut occupancy: u8 = 0;
                 // TODO: FIX
                 if self.aircraft.as_ref().unwrap().check_if_occupied(x,y) {
@@ -140,8 +140,12 @@ impl PyAircraft {
         Ok(self.aircraft.as_ref().unwrap().is_complete())
     }
 
-    fn get_size(&self) -> PyResult<u16> {
-        Ok(self.size)
+    fn get_size_x(&self) -> PyResult<u16> {
+        Ok(self.size.0)
+    }
+
+    fn get_size_y(&self) -> PyResult<u16> {
+        Ok(self.size.1)
     }
 
     fn test(&mut self, x: u16, y: u16) -> PyResult<()> {
