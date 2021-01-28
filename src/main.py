@@ -15,6 +15,7 @@ class Application(tk.Frame):
         self.running = False
     
         self.stepsTaken = 0
+        self.updateDelay = 500
 
         self.pStatus = tk.StringVar()
         self.pStatus.set("Running...")
@@ -176,16 +177,30 @@ class Application(tk.Frame):
 
     def initInteractive(self):
         self.canvas = tk.Canvas(self.master, bg="blue", width=(self.size_x*25), height=(self.size_y*25))
-        self.pauseButton = tk.Button(self.master,text="Start/Stop",command=self.toggle)
-        self.pauseIndicator = tk.Label(self.master,textvariable=self.pStatus)
-        self.stepIndicator = tk.Label(self.master, textvariable=self.strStepsTaken)
 
+        self.controlWidget = tk.Frame(self.master)
+        print("controlWidget")
+
+
+        self.pauseButton = tk.Button(self.controlWidget,text="Start/Stop",command=self.toggle)
+        print("pauseButton")
+        self.pauseIndicator = tk.Label(self.master,textvariable=self.pStatus)
+        print("pauseIndicator")
+        self.stepIndicator = tk.Label(self.master, textvariable=self.strStepsTaken)
+        self.speedUpButton = tk.Button(self.controlWidget,text=">>",command=self.decreaseDelay)
+        self.speedDownButton = tk.Button(self.controlWidget,text="<<",command=self.increaseDelay)
+
+        print("Created widgets")
 
         self.canvas.pack()
         self.pauseIndicator.pack()
-        self.pauseButton.pack()
+        self.controlWidget.pack()
+        self.speedDownButton.pack(side=tk.LEFT)
+        self.pauseButton.pack(side=tk.LEFT)
+        self.speedUpButton.pack()
         self.stepIndicator.pack()
 
+        print("Packed widgets")
 
         self.canvasUpdate()
 
@@ -231,7 +246,8 @@ class Application(tk.Frame):
             self.stepsTaken += 1
             self.strStepsTaken.set(str(self.stepsTaken))
             if self.running == True:
-                self.canvas.after(500, self.canvasUpdate)
+                # self.canvas.after(500, self.canvasUpdate)
+                self.canvas.after(self.updateDelay, self.canvasUpdate)
             else:
                 self.restart()
         else:
@@ -239,6 +255,20 @@ class Application(tk.Frame):
             self.drawLayout()
             self.drawPassengers()
             print("Done.")
+
+    def increaseDelay(self):
+        if self.updateDelay < 700:
+            self.updateDelay += 100
+        else:
+            self.updateDelay = 750
+        print(self.updateDelay)
+    
+    def decreaseDelay(self):
+        if self.updateDelay > 200:
+            self.updateDelay -= 100
+        else:
+            self.updateDelay = 150
+        print(self.updateDelay)
 
 
 master = tk.Tk()
