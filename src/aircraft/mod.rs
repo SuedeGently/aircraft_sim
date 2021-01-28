@@ -109,7 +109,7 @@ impl Aircraft {
                             if !self.layout[dest_x][dest_y].is_occupied() || (dest_x, dest_y) == (i, j) {
                                 current_move = (potential_move.0, new_distance);
                                 log::debug!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
-                            } else if !self.layout[dest_x][dest_y].is_allowing() {
+                            } else if !self.layout[dest_x][dest_y].is_allowing() && self.layout[dest_x][dest_y].get_variant() == Variant::Seat {
                                 current_move = (potential_move.0, new_distance);
                                 log::debug!("NEW MOVE: {:?} x {}", current_move.0, current_move.1);
                             } else {
