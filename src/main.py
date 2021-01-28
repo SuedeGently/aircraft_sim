@@ -1,7 +1,9 @@
+# init_random_back_front
+
 import aircraft_sim
 import tkinter as tk
 
-DEFAULT_SIZE = 4
+DEFAULT_SIZE = 11
 
 class Application(tk.Frame):
     def __init__(self, master=None):
@@ -23,6 +25,7 @@ class Application(tk.Frame):
         self.passImage = tk.PhotoImage(file="./images/pass.png")
         self.alloImage = tk.PhotoImage(file="./images/allo.png")
 
+        # MAIN MENU #===========================================================
         self.mainFrame = tk.Frame(self.master)
 
         self.interButton = tk.Button(self.mainFrame,
@@ -30,19 +33,26 @@ class Application(tk.Frame):
                                      command=self.startInteractive)
         self.massButton = tk.Button(self.mainFrame,text="Mass Mode",command=self.startMass)
 
+        ## INTERACTIVE MODE MENU ##=============================================
         self.interactiveFrame = tk.Frame(self.master)
+
+        self.fileButton = tk.Button(self.interactiveFrame,text="From File",command=self.interactiveFromFile)
+        self.backFrontButton = tk.Button(self.interactiveFrame,text="Random back-to-front",command=self.initialiseFromBackFront)
+
+        ### FROM FILE MENU ###==================================================
+        self.fileFrame = tk.Frame(self.master)
         
-        self.layoutFrame = tk.Frame(self.interactiveFrame)
+        self.layoutFrame = tk.Frame(self.fileFrame)
         self.layoutLabel = tk.Label(master=self.layoutFrame, text="Layout file:")
         self.layoutEntry = tk.Entry(self.layoutFrame)
         
-        self.passengerFrame = tk.Frame(self.interactiveFrame)
+        self.passengerFrame = tk.Frame(self.fileFrame)
         self.passengerLabel = tk.Label(self.passengerFrame, text="Pasengers file:")
         self.passengerEntry = tk.Entry(self.passengerFrame)
 
-        self.layoutConfirm = tk.Button(self.interactiveFrame,
+        self.layoutConfirm = tk.Button(self.fileFrame,
                 text="Confirm file",
-                command=self.createAircraft)
+                command=self.initialiseFromFile)
         
         self.mainFrame.pack()
         self.interButton.pack()
@@ -56,6 +66,21 @@ class Application(tk.Frame):
         self.mainFrame.destroy()
 
         self.interactiveFrame.pack()
+        self.fileButton.pack()
+        self.backFrontButton.pack()
+
+        # self.layoutFrame.pack()
+        # self.layoutLabel.pack(side=tk.LEFT)
+        # self.layoutEntry.pack()
+        # self.passengerFrame.pack()
+        # self.passengerLabel.pack(side=tk.LEFT)
+        # self.passengerEntry.pack()
+        # self.layoutConfirm.pack()
+
+    def interactiveFromFile(self):
+        self.interactiveFrame.destroy()
+
+        self.fileFrame.pack()
         self.layoutFrame.pack()
         self.layoutLabel.pack(side=tk.LEFT)
         self.layoutEntry.pack()
@@ -75,7 +100,7 @@ class Application(tk.Frame):
     def startMass(self):
         print("Not implemented")
 
-    def createAircraft(self):
+    def initialiseFromFile(self):
         self.running = True
         self.layoutFile = self.layoutEntry.get()
         self.passengerFile = self.passengerEntry.get()
@@ -84,12 +109,25 @@ class Application(tk.Frame):
             self.aircraft.initialise_logger()
             self.size = self.aircraft.get_size()
             
-            self.interactiveFrame.destroy()
+            self.fileFrame.destroy()
 
             self.initInteractive()
         except:
             print("Failed to initialise from file")
         # self.aircraft = aircraft_sim.PyAircraft("./config/test_layout.csv", "./config/test_passengers.csv") # For debug _ONLY_
+
+    def initialiseFromBackFront(self):
+        self.running = True
+        try:
+            self.aircraft.init_random_back_front(DEFAULT_SIZE, DEFAULT_SIZE)
+            self.aircraft.initialise_logger()
+            self.size = self.aircraft.get_size()
+            
+            self.interactiveFrame.destroy()
+
+            self.initInteractive()
+        except:
+            print("Failed to initialise from file")
 
 
     def initInteractive(self):

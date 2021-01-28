@@ -13,7 +13,7 @@ use simple_logger::SimpleLogger;
 use aircraft::Aircraft;
 use aircraft::person::Person;
 use aircraft::tile::Variant;
-use config::{read_layout, read_passengers};
+use config::{read_layout, read_passengers, random_back_first, standard_layout};
 
 create_exception!(PyAircraft, CustomError, PyException);
 
@@ -65,6 +65,27 @@ impl PyAircraft {
             }
         } else {
             Err(PyTypeError::new_err("Error2"))
+        }
+    }
+
+    fn init_random_back_front(&mut self, size_x: u16, size_y: u16) -> PyResult<()> {
+        if self.aircraft.is_none() {
+            let new_aircraft = standard_layout(size_x, size_y);
+            let passengers = random_back_first(size_x, size_y);
+
+            if passengers.is_ok() && new_aircraft.is_ok() {
+                let mut new_aircraft = new_aircraft.unwrap();
+                for i in passengers.unwrap() {
+                    new_aircraft.add_passenger(i);
+                }
+                self.aircraft = Some(new_aircraft);
+                self.size = size_x;
+                Ok(())
+            } else {
+                Err(PyTypeError::new_err("Error3"))
+            }
+        } else {
+            Err(PyTypeError::new_err("Error3"))
         }
     }
     

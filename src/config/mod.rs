@@ -45,18 +45,36 @@ fn str_to_var(var: &str) -> Variant {
     }
 }
 
+pub fn standard_layout(size_x: u16, size_y: u16) -> Result<Aircraft, &'static str> {
+    log::info!("Generating standard-layout aircraft");
+    // size_y MUST be odd
+    let mut aircraft = Aircraft::new(size_x, size_y);
+    let aisle = size_x / 2;
+    for y in 0..size_y {
+        for x in 0..size_x {
+            if x != aisle {
+                aircraft.set_tile(x, y, Variant::Seat);
+            }
+        }
+    }
+    aircraft.set_tile(aisle, size_y - 1, Variant::Entrance);
+
+    return Ok(aircraft);
+}
+
 pub fn random_back_first(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'static str> {
+    log::info!("Generating random back-first boarding pattern");
     // size_y MUST be odd
     let mut persons = Vec::<Person>::new();
     let aisle: u16 = size_x / 2;
 
     for y in 0..size_y {
-    let mut x_coords: Vec<u16> = (0..size_x).collect();
-    x_coords.shuffle(&mut thread_rng());
+        let mut x_coords: Vec<u16> = (0..size_x).collect();
+        x_coords.shuffle(&mut thread_rng());
         for x in x_coords {
             if x != aisle {
                 let mut person = Person::new("DEFAULT");
-                person.target_seat(x, y);
+                person.target_seat(x, size_y - (y + 1));
                 person.set_baggage(true);
                 persons.push(person);
             }

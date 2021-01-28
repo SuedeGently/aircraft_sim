@@ -1,7 +1,7 @@
 use std::fmt;
 use super::person::Person;
 
-const PASS_WAIT: u8 = 1; // The amount of additional steps taken when moving
+const PASS_WAIT: u8 = 2; // The amount of additional steps taken when moving
                          // past an occupied seat
 
 #[derive(PartialEq, Debug, Clone, Copy)]
