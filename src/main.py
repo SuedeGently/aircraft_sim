@@ -45,6 +45,7 @@ class Application(tk.Frame):
 
         self.fileButton = tk.Button(self.interactiveFrame,text="From File",command=self.interactiveFromFile)
         self.backFrontButton = tk.Button(self.interactiveFrame,text="Random back-to-front",command=self.initialiseFromBackFront)
+        self.frontBackButton = tk.Button(self.interactiveFrame,text="Random front-to-back",command=self.initialiseFromFrontBack)
 
         ### FROM FILE MENU ###==================================================
         self.fileFrame = tk.Frame(self.master)
@@ -80,6 +81,7 @@ class Application(tk.Frame):
         self.sizeYEntry.pack()
         self.fileButton.pack()
         self.backFrontButton.pack()
+        self.frontBackButton.pack()
 
         # self.layoutFrame.pack()
         # self.layoutLabel.pack(side=tk.LEFT)
@@ -140,6 +142,27 @@ class Application(tk.Frame):
             size_y = DEFAULT_SIZE
         try:
             self.aircraft.init_random_back_front(size_x, size_y)
+            self.aircraft.initialise_logger()
+            self.size_x = self.aircraft.get_size_x()
+            self.size_y = self.aircraft.get_size_y()
+            
+            self.interactiveFrame.destroy()
+
+            self.initInteractive()
+        except:
+            print("Failed to initialise from file")
+    
+    def initialiseFromFrontBack(self):
+        self.running = True
+        try:
+            size_x = int(self.sizeXEntry.get())
+            size_y = int(self.sizeYEntry.get())
+        except:
+            tk.messagebox.showwarning("Invalid Input", "The values you entered were invalid; using default values instead")
+            size_x = DEFAULT_SIZE
+            size_y = DEFAULT_SIZE
+        try:
+            self.aircraft.init_random_front_back(size_x, size_y)
             self.aircraft.initialise_logger()
             self.size_x = self.aircraft.get_size_x()
             self.size_y = self.aircraft.get_size_y()

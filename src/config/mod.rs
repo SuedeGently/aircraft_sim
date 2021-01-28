@@ -84,6 +84,28 @@ pub fn random_back_first(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'stat
     Ok(persons)
 }
 
+pub fn random_front_first(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'static str> {
+    log::info!("Generating random back-first boarding pattern");
+    // size_y MUST be odd
+    let mut persons = Vec::<Person>::new();
+    let aisle: u16 = size_x / 2;
+
+    for y in 0..size_y {
+        let mut x_coords: Vec<u16> = (0..size_x).collect();
+        x_coords.shuffle(&mut thread_rng());
+        for x in x_coords {
+            if x != aisle {
+                let mut person = Person::new("DEFAULT");
+                person.target_seat(x, y);
+                person.set_baggage(true);
+                persons.push(person);
+            }
+        }
+    }
+
+    Ok(persons)
+}
+
 
 
 pub fn read_passengers(path: &Path) -> Option<Vec<Person>> {
