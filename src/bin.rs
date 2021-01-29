@@ -28,6 +28,8 @@ fn main() {
     
     if aircraft.is_some() && passengers.is_some() {
         let mut aircraft = aircraft.unwrap();
+        SimpleLogger::new().init().expect("Failed to initialise logger");
+        log::info!("Initialised logger");
         for i in passengers.unwrap() {
             aircraft.add_passenger(i);
         }
