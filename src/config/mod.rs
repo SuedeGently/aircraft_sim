@@ -1,13 +1,17 @@
+//! Handles configuration such as reading from files and generating boarding
+//! patterns.
+
 use std::fs::File;
 use std::path::Path;
 
 use super::aircraft::Aircraft;
-use super::aircraft::tile::{Tile,Variant};
+use super::aircraft::tile::Variant;
 use super::aircraft::person::Person;
 
 use rand::thread_rng;
 use rand::seq::SliceRandom;
 
+/// Temporary holder for data about seats when reading from files.
 struct seat_data {
     seat_x: u16,
     seat_y: u16,
@@ -15,6 +19,7 @@ struct seat_data {
 }
 
 impl seat_data {
+    /// Constructor
     fn new(x: u16, y: u16, variant: &str) -> seat_data {
         seat_data {
             seat_x: x,
@@ -36,6 +41,10 @@ impl seat_data {
     }
 }
 
+/// Converts a string into an associated Variant.
+///
+/// This is for use when calling Rust code from Python, as Python does not share
+/// the same enums.
 fn str_to_var(var: &str) -> Variant {
     match var {
         "aisle" => Variant::Aisle,
@@ -45,9 +54,19 @@ fn str_to_var(var: &str) -> Variant {
     }
 }
 
-pub fn standard_layout(size_x: u16, size_y: u16) -> Result<Aircraft, &'static str> {
+/// Generates an aircraft with a single aisle down the center and seats either
+/// side in the given size.
+pub fn standard_layout(mut size_x: u16, size_y: u16)
+    -> Result<Aircraft, &'static str> {
+
     log::info!("Generating standard-layout aircraft");
-    // size_y MUST be odd
+
+    if size_x % 2 == 0 {
+        log::warn!("Invalid size_x value; assuming closest odd value.");
+        size_x += 1;
+    }
+
+
     let mut aircraft = Aircraft::new(size_x, size_y);
     let aisle = size_x / 2;
     for y in 0..size_y {
@@ -62,9 +81,16 @@ pub fn standard_layout(size_x: u16, size_y: u16) -> Result<Aircraft, &'static st
     return Ok(aircraft);
 }
 
-pub fn random_back_first(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'static str> {
+/// Generates a list of passengers that will board in standard back-first order
+/// with randomised positions on each row.
+pub fn random_back_first(mut size_x: u16, size_y: u16)
+    -> Result<Vec<Person>, &'static str> {
+
     log::info!("Generating random back-first boarding pattern");
-    // size_y MUST be odd
+    if size_x % 2 == 0 {
+        log::warn!("Invalid size_x value; assuming closest odd value.");
+        size_x += 1;
+    }
     let mut persons = Vec::<Person>::new();
     let aisle: u16 = size_x / 2;
 
@@ -84,9 +110,16 @@ pub fn random_back_first(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'stat
     Ok(persons)
 }
 
-pub fn random_front_first(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'static str> {
+/// Generates a list of passengers that will board in standard front-first order
+/// with randomised positions on each row.
+pub fn random_front_first(mut size_x: u16, size_y: u16)
+    -> Result<Vec<Person>, &'static str> {
+
     log::info!("Generating random front-first boarding pattern");
-    // size_y MUST be odd
+    if size_x % 2 == 0 {
+        log::warn!("Invalid size_x value; assuming closest odd value.");
+        size_x += 1;
+    }
     let mut persons = Vec::<Person>::new();
     let aisle: u16 = size_x / 2;
 
@@ -106,9 +139,16 @@ pub fn random_front_first(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'sta
     Ok(persons)
 }
 
-pub fn random_window_first(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'static str> {
+/// Generates a list of passengers that will board in standard window-first
+/// order with randomised positions on each row.
+pub fn random_window_first(mut size_x: u16, size_y: u16)
+    -> Result<Vec<Person>, &'static str> {
+
     log::info!("Generating random aisle-first boarding pattern");
-    // size_y MUST be odd
+    if size_x % 2 == 0 {
+        log::warn!("Invalid size_x value; assuming closest odd value.");
+        size_x += 1;
+    }
     let mut persons = Vec::<Person>::new();
     let aisle: u16 = size_x / 2;
 
@@ -132,9 +172,16 @@ pub fn random_window_first(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'st
     Ok(persons)
 }
 
-pub fn random_aisle_first(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'static str> {
+/// Generates a list of passengers that will board in standard aisle-first
+/// order with randomised positions on each row.
+pub fn random_aisle_first(mut size_x: u16, size_y: u16)
+    -> Result<Vec<Person>, &'static str> {
+
     log::info!("Generating random aisle-first boarding pattern");
-    // size_y MUST be odd
+    if size_x % 2 == 0 {
+        log::warn!("Invalid size_x value; assuming closest odd value.");
+        size_x += 1;
+    }
     let mut persons = Vec::<Person>::new();
     let aisle: u16 = size_x / 2;
 
@@ -158,9 +205,13 @@ pub fn random_aisle_first(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'sta
     Ok(persons)
 }
 
-pub fn random(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'static str> {
+/// Generates a list of passengers that will board in completely random order.
+pub fn random(mut size_x: u16, size_y: u16) -> Result<Vec<Person>, &'static str> {
     log::info!("Generating random aisle-first boarding pattern");
-    // size_y MUST be odd
+    if size_x % 2 == 0 {
+        log::warn!("Invalid size_x value; assuming closest odd value.");
+        size_x += 1;
+    }
     let mut persons = Vec::<Person>::new();
     let aisle: u16 = size_x / 2;
     let mut coords: Vec<(u16,u16)> = Vec::new();
@@ -187,6 +238,8 @@ pub fn random(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'static str> {
     Ok(persons)
 }
 
+/// Reads a list of passengers from a correctly formatted csv file and returns
+/// them as a vector of `Person` objects.
 pub fn read_passengers(path: &Path) -> Option<Vec<Person>> {
     let mut persons = Vec::<Person>::new();
     let file = File::open(path).expect("Invalid file path");
@@ -196,7 +249,8 @@ pub fn read_passengers(path: &Path) -> Option<Vec<Person>> {
         let mut data = Person::new(
             &record[0],
         );
-        data.target_seat(record[1].parse().expect("Invalid x coord"), record[2].parse().expect("Invalid y coord"));
+        data.target_seat(record[1].parse().expect("Invalid x coord"),
+                         record[2].parse().expect("Invalid y coord"));
         data.set_baggage(match &record[3] {
             "0" => false,
             "1" => true,
@@ -210,6 +264,8 @@ pub fn read_passengers(path: &Path) -> Option<Vec<Person>> {
     return Some(persons);
 }
 
+/// Reads a list of tiles from a correctly formatted csv and returns them as an
+/// `Aircraft` object with that layout.
 pub fn read_layout(path: &Path) -> Option<Aircraft> {
     let mut seats = Vec::<seat_data>::new();
     let file = File::open(path).expect("Invalid file path");

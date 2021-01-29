@@ -1,18 +1,26 @@
-// mod tile;
+//! Holds structures and methods useful for passengers and movement.
+//!
+//! Mostly responsible for providing `Aircraft` with the information necessary
+//! to determine this passenger's optimal move.
 
 use std::fmt;
-use super::tile::{Variant, Tile, SimpleTile};
+// use super::tile::{Variant, Tile, SimpleTile};
 
+/// This enum represents a possible move for a pasenger during an update.
 #[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Behaviour {
     Move_North,
     Move_South,
     Move_East,
     Move_West,
-    Stow,
+    Stow, // stow baggage
     Wait,
 }
 
+/// A single passenger
+///
+/// `seat` represents a passenger's assigned seat, and baggage stores whether
+/// the passenger still has their carry-on luggage or not.
 pub struct Person {
     name: String,
     seat: Option<(u16, u16)>,
@@ -20,6 +28,17 @@ pub struct Person {
 }
 
 impl Person {
+    /// Constructor
+    ///
+    /// All passengers start with no target seat or luggage.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let person = Person::new("DEFAULT");
+    ///
+    /// assert_eq!(person.get_name(), "DEFAULT");
+    /// ```
     pub fn new(n: &str) -> Person {
         Person {
             name: n.to_string(),
@@ -27,11 +46,23 @@ impl Person {
             baggage: false,
         }
     }
-
+    
+    /// Sets a passenger's target seat.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let person = Person::new("DEFAULT");
+    ///
+    /// person.target_seat(2,2);
+    ///
+    /// assert_eq!(person.get_seat(), (2,2));
+    /// ```
     pub fn target_seat(&mut self, x: u16, y: u16) {
         self.seat = Some((x, y));
     }
 
+    /// Sets a passenger's `baggage` value to false.
     pub fn remove_baggage(&mut self) {
         if self.baggage {
             log::info!("Removing baggage");
@@ -40,8 +71,6 @@ impl Person {
             log::warn!("Invalid call to `remove_baggage()`");
         }
     }
-
-    // pub fn check_for_delay(&self) -> Option<Behaviour> {
 
     pub fn has_baggage(&self) -> bool {
         self.baggage
@@ -64,6 +93,8 @@ impl Person {
     }
 }
 
+/// Defines how Rust should display this object if it is passed to stdout via a
+/// standard library macro like `println`.
 impl fmt::Debug for Person {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Person")

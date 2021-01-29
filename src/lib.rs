@@ -18,12 +18,20 @@ use config::*;
 
 create_exception!(PyAircraft, CustomError, PyException);
 
-#[pyfunction]
-fn test() -> PyResult<String> {
-    println!("Printing to console in Rust");
-    Ok(format!("Here it is?"))
-}
-
+/// Python-accesible structure used for interactive mode
+///
+/// This structure is accesible via Python and provides methods that call
+/// through to Rust code; essentially this is a wrapper that allows for
+/// predetermined interactions with the Rust backend.
+///
+/// # Examples
+///
+/// ```python
+/// # Python code
+/// import aircraft_sim
+///
+/// plane = aircraft_sim.PyAircraft()
+/// ```
 #[pyclass]
 struct PyAircraft {
     aircraft: Option<Aircraft>,
@@ -32,6 +40,7 @@ struct PyAircraft {
 
 #[pymethods]
 impl PyAircraft {
+    /// Constructor
     #[new]
     fn new() -> Self {
         PyAircraft{
@@ -39,7 +48,11 @@ impl PyAircraft {
             aircraft: None,
         }
     }
-
+    
+    /// Initialises the Rust logger
+    ///
+    /// Doesn't need to be called, however if it is not the rust logging will
+    /// not be output. This can be modified to change the displayed log level.
     #[staticmethod]
     fn initialise_logger() -> PyResult<()> {
         SimpleLogger::new().init().expect("Failed to initialise logger");
@@ -47,8 +60,27 @@ impl PyAircraft {
 
         Ok(())
     }
-
-    fn init_from_file(&mut self, layout_path: &str, passengers_path: &str) -> PyResult<()> {
+    
+    /// Initialises an interactive Aircraft object from filenames.
+    ///
+    /// Initialises an interactive Aircraft object using the csv file at
+    /// `layout_path` and fills it with the passengers contained in the list at
+    /// `passengers_path`.
+    ///
+    /// # Examples
+    ///
+    /// ```python
+    /// # Python Code
+    /// import aircraft_sim
+    /// 
+    /// try:
+    ///     plane = aircraft_sim.PyAircraft()
+    ///     plane.init_from_file("./layout.csv", "./passengers.csv")
+    /// except:
+    ///     print("File doesn't exist")
+    /// ```
+    fn init_from_file(&mut self, layout_path: &str, passengers_path: &str)
+        -> PyResult<()> {
         if self.aircraft.is_none() {
             let new_aircraft = read_layout(Path::new(layout_path));
             let passengers = read_passengers(Path::new(passengers_path));
@@ -69,7 +101,25 @@ impl PyAircraft {
         }
     }
 
-    fn init_random_back_front(&mut self, size_x: u16, size_y: u16) -> PyResult<()> {
+    /// Initialises an interactive Aircraft object with a back-first boarding
+    /// pattern of passengers.
+    ///
+    /// Initialises an interactive Aircraft object of the given size and fills
+    /// it with passengers in a back-first pattern.
+    ///
+    /// # Examples
+    ///
+    /// ```python
+    /// # Python Code
+    /// import aircraft_sim
+    /// 
+    /// try:
+    ///     plane = aircraft_sim.PyAircraft()
+    ///     plane.init_back_front(7,10)
+    /// except:
+    ///     print("Invalid size")
+    /// ```
+    fn init_random_back_front(&mut self,size_x:u16,size_y:u16) -> PyResult<()> {
         if self.aircraft.is_none() {
             let new_aircraft = standard_layout(size_x, size_y);
             let passengers = random_back_first(size_x, size_y);
@@ -90,7 +140,25 @@ impl PyAircraft {
         }
     }
 
-    fn init_random_front_back(&mut self, size_x: u16, size_y: u16) -> PyResult<()> {
+    /// Initialises an interactive Aircraft object with a front-first boarding
+    /// pattern of passengers.
+    ///
+    /// Initialises an interactive Aircraft object of the given size and fills
+    /// it with passengers in a front-first pattern.
+    ///
+    /// # Examples
+    ///
+    /// ```python
+    /// # Python Code
+    /// import aircraft_sim
+    /// 
+    /// try:
+    ///     plane = aircraft_sim.PyAircraft()
+    ///     plane.init_front_back(7,10)
+    /// except:
+    ///     print("Invalid size")
+    /// ```
+    fn init_random_front_back(&mut self,size_x:u16,size_y:u16) -> PyResult<()> {
         if self.aircraft.is_none() {
             let new_aircraft = standard_layout(size_x, size_y);
             let passengers = random_front_first(size_x, size_y);
@@ -111,7 +179,25 @@ impl PyAircraft {
         }
     }
 
-    fn init_random_aisle_first(&mut self, size_x: u16, size_y: u16) -> PyResult<()> {
+    /// Initialises an interactive Aircraft object with an aisle-first boarding
+    /// pattern of passengers.
+    ///
+    /// Initialises an interactive Aircraft object of the given size and fills
+    /// it with passengers in a aisle-first pattern.
+    ///
+    /// # Examples
+    ///
+    /// ```python
+    /// # Python Code
+    /// import aircraft_sim
+    /// 
+    /// try:
+    ///     plane = aircraft_sim.PyAircraft()
+    ///     plane.init_aisle_first(7,10)
+    /// except:
+    ///     print("Invalid size")
+    /// ```
+    fn init_random_aisle_first(&mut self,size_x:u16,size_y:u16)-> PyResult<()> {
         if self.aircraft.is_none() {
             let new_aircraft = standard_layout(size_x, size_y);
             let passengers = random_aisle_first(size_x, size_y);
@@ -132,7 +218,26 @@ impl PyAircraft {
         }
     }
 
-    fn init_random_window_first(&mut self, size_x: u16, size_y: u16) -> PyResult<()> {
+    /// Initialises an interactive Aircraft object with a window-first boarding
+    /// pattern of passengers.
+    ///
+    /// Initialises an interactive Aircraft object of the given size and fills
+    /// it with passengers in a window-first pattern.
+    ///
+    /// # Examples
+    ///
+    /// ```python
+    /// # Python Code
+    /// import aircraft_sim
+    /// 
+    /// try:
+    ///     plane = aircraft_sim.PyAircraft()
+    ///     plane.init_window_first(7,10)
+    /// except:
+    ///     print("Invalid size")
+    /// ```
+    fn init_random_window_first(&mut self, size_x: u16, size_y: u16)
+        -> PyResult<()> {
         if self.aircraft.is_none() {
             let new_aircraft = standard_layout(size_x, size_y);
             let passengers = random_window_first(size_x, size_y);
@@ -153,6 +258,24 @@ impl PyAircraft {
         }
     }
 
+    /// Initialises an interactive Aircraft object with a pseudo-random boarding
+    /// pattern of passengers.
+    ///
+    /// Initialises an interactive Aircraft object of the given size and fills
+    /// it with passengers in a random pattern.
+    ///
+    /// # Examples
+    ///
+    /// ```python
+    /// # Python Code
+    /// import aircraft_sim
+    /// 
+    /// try:
+    ///     plane = aircraft_sim.PyAircraft()
+    ///     plane.init_random(7,10)
+    /// except:
+    ///     print("Invalid size")
+    /// ```
     fn init_random(&mut self, size_x: u16, size_y: u16) -> PyResult<()> {
         if self.aircraft.is_none() {
             let new_aircraft = standard_layout(size_x, size_y);
@@ -174,13 +297,20 @@ impl PyAircraft {
         }
     }
     
+    /// Returns the aircraft's layout
+    ///
+    /// Returns the layout of the aircraft as a nested vector using integers
+    /// instead of enums to provide Python compatibility.
     fn get_values(&mut self) -> PyResult<Vec<Vec<u8>>> {
         if self.aircraft.is_some() {
             let mut values = Vec::<Vec<u8>>::new();
             for y in 0..self.size.1 {
                 let mut row = Vec::<u8>::new();
                 for x in 0..self.size.0 {
-                    row.push(match self.aircraft.as_mut().unwrap().get_tile_variant(x,y) {
+                    row.push(match self.aircraft
+                             .as_mut()
+                             .unwrap()
+                             .get_tile_variant(x,y) {
                         Variant::None => 0,
                         Variant::Aisle => 1,
                         Variant::Seat => 2,
@@ -194,7 +324,12 @@ impl PyAircraft {
             return Err(PyTypeError::new_err("Error"));
         }
     }
-
+    
+    /// Returns the positions of passengers on the given aircraft.
+    ///
+    /// Returns an integer representing the number of passengers occupying each
+    /// space on an aircraft, using the same nested vector arrangement as
+    /// `PyAircraft.get_values()`
     fn get_occupancy(&self) -> Vec<Vec<u8>> {
         let mut values = Vec::<Vec<u8>>::new();
         for y in 0..self.size.1 {
@@ -215,7 +350,26 @@ impl PyAircraft {
         }
         return values;
     }
-
+    
+    /// Iterates the aircraft once.
+    ///
+    /// Calls `Aircraft.update()` and returns a boolean representing whether the
+    /// aircraft's passengers have all reached their seats yet.
+    ///
+    /// # Examples
+    ///
+    /// ```Python code
+    /// import aircraft_sim
+    ///
+    /// plane = aircraft_sim.PyAircraft()
+    /// plane.init_random(7,10)
+    ///
+    /// iterations = 0
+    /// while not plane.update():
+    ///     iterations += 1
+    ///
+    /// print("It took", iterations, "iterations to complete!")
+    /// ```
     fn update(&mut self) -> PyResult<bool> {
         // TODO: FIX THIS
         self.aircraft.as_mut().unwrap().update();
@@ -231,48 +385,58 @@ impl PyAircraft {
     fn get_size_y(&self) -> PyResult<u16> {
         Ok(self.size.1)
     }
-
-    fn test(&mut self, x: u16, y: u16) -> PyResult<()> {
-        let mut dave = Person::new("Dave");
-        dave.target_seat(x,y);
-
-        // TODO: FIX THIS
-        self.aircraft.as_mut().unwrap().add_passenger(dave);
-
-        Ok(())
-    }
 }
 
+/// Simulates a number of aircraft in parallel and returns how long each took to
+/// complete.
+///
+/// Takes two vectors of filepaths, one for layout files and one for passenger
+/// files, and simulates each pair. Every aircraft is simulated in parallel with
+/// one another and the resulting times taken are returned as a vector in the
+/// same order they were passed in.
 #[pyfunction]
-fn mass_sim(layouts: Vec<&str>, passenger_lists: Vec<&str>) -> PyResult<Vec<u16>> {
+fn mass_sim(layouts:Vec<&str>,passenger_lists:Vec<&str>) -> PyResult<Vec<u16>> {
+    // If a different number of files are passed in for each argument, the input
+    // is invalid.
     if layouts.len() != passenger_lists.len() {
-        return Err(PyTypeError::new_err("Error3"));
+        return Err(PyTypeError::new_err("Invalid input lengths"));
     }
 
     let mut results = Vec::<u16>::new();
-    let mut jobs: Vec<thread::JoinHandle<Result<u16, &'static str>>> = Vec::new();
+
+    // This vector holds the handles for each thread, allowing them to be joined
+    // after completion.
+    let mut jobs:Vec<thread::JoinHandle<Result<u16,&'static str>>> = Vec::new();
 
     for i in 0..layouts.len() {
         let aircraft = read_layout(Path::new(layouts.get(i).unwrap()));
-        let passengers = read_passengers(Path::new(passenger_lists.get(i).unwrap()));
+        let passengers = read_passengers(Path::new(passenger_lists
+                                                   .get(i)
+                                                   .unwrap()));
         
         if aircraft.is_some() && passengers.is_some() {
             let mut aircraft = aircraft.unwrap();
             for i in passengers.unwrap() {
                 aircraft.add_passenger(i);
             }
+
+            // A new thread for each aircraft simulation is created.
             jobs.push(thread::spawn(move || {
                 aircraft.run_to_completion()
             }));
         }
     }
-
+    
+    // All threads are joined here; errors are logged and a 0 value returned.
     for i in jobs {
         match i.join() {
             Ok(x) => {
                 match x {
                     Ok(x) => results.push(x),
-                    Err(e) => log::error!("Simulation failed: {}", e)
+                    Err(e) => {
+                        log::error!("Simulation failed: {}", e);
+                        results.push(0);
+                    },
                 }
             },
             Err(e) => log::error!("Simulation failed: {:?}", e),
