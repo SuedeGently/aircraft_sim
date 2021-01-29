@@ -32,7 +32,7 @@ class Application(tk.Frame):
 
         self.interButton = tk.Button(self.mainFrame,
                                      text="Interactive mode",
-                                     command=self.startInteractive)
+                                     command=self.startInteractiveMenu)
         self.massButton = tk.Button(self.mainFrame,text="Mass Mode",command=self.startMass)
 
         ## INTERACTIVE MODE MENU ##=============================================
@@ -47,6 +47,8 @@ class Application(tk.Frame):
         self.fileButton = tk.Button(self.interactiveFrame,text="From File",command=self.interactiveFromFile)
         self.backFrontButton = tk.Button(self.interactiveFrame,text="Random back-to-front",command=self.initialiseFromBackFront)
         self.frontBackButton = tk.Button(self.interactiveFrame,text="Random front-to-back",command=self.initialiseFromFrontBack)
+        self.aisleFirstButton = tk.Button(self.interactiveFrame,text="Random Aisle First",command=self.initialiseFromAisleFirst)
+        self.windowFirstButton = tk.Button(self.interactiveFrame,text="Random Window First",command=self.initialiseFromWindowFirst)
 
         ### FROM FILE MENU ###==================================================
         self.fileFrame = tk.Frame(self.master)
@@ -67,11 +69,11 @@ class Application(tk.Frame):
         self.interButton.pack()
         self.massButton.pack()
 
-        # self.startInteractive()
+        # self.startInteractiveMenu()
 
         self.master = master
 
-    def startInteractive(self):
+    def startInteractiveMenu(self):
         self.mainFrame.destroy()
 
         self.interactiveFrame.pack()
@@ -83,6 +85,8 @@ class Application(tk.Frame):
         self.fileButton.pack()
         self.backFrontButton.pack()
         self.frontBackButton.pack()
+        self.aisleFirstButton.pack()
+        self.windowFirstButton.pack()
 
         # self.layoutFrame.pack()
         # self.layoutLabel.pack(side=tk.LEFT)
@@ -139,20 +143,23 @@ class Application(tk.Frame):
             size_x = int(self.sizeXEntry.get())
             size_y = int(self.sizeYEntry.get())
         except:
-            tk.messagebox.showwarning("Invalid Input", "The values you entered were invalid; using default values instead")
+            tk.messagebox.showwarning(
+                    "Invalid Input",
+                    "The values you entered were invalid; " \
+                    "using default values instead")
             size_x = DEFAULT_SIZE
             size_y = DEFAULT_SIZE
         try:
             self.aircraft.init_random_back_front(size_x, size_y)
-            self.aircraft.initialise_logger()
-            self.size_x = self.aircraft.get_size_x()
-            self.size_y = self.aircraft.get_size_y()
-            
-            self.interactiveFrame.destroy()
-
-            self.initInteractive()
         except:
             print("Failed to initialise from file")
+        self.aircraft.initialise_logger()
+        self.size_x = self.aircraft.get_size_x()
+        self.size_y = self.aircraft.get_size_y()
+        
+        self.interactiveFrame.destroy()
+
+        self.initInteractive()
     
     def initialiseFromFrontBack(self):
         self.running = True
@@ -165,15 +172,58 @@ class Application(tk.Frame):
             size_y = DEFAULT_SIZE
         try:
             self.aircraft.init_random_front_back(size_x, size_y)
-            self.aircraft.initialise_logger()
-            self.size_x = self.aircraft.get_size_x()
-            self.size_y = self.aircraft.get_size_y()
-            
-            self.interactiveFrame.destroy()
-
-            self.initInteractive()
         except:
             print("Failed to initialise from file")
+        self.aircraft.initialise_logger()
+        self.size_x = self.aircraft.get_size_x()
+        self.size_y = self.aircraft.get_size_y()
+        
+        self.interactiveFrame.destroy()
+
+        self.initInteractive()
+
+    def initialiseFromAisleFirst(self):
+        self.running = True
+        try:
+            size_x = int(self.sizeXEntry.get())
+            size_y = int(self.sizeYEntry.get())
+        except:
+            tk.messagebox.showwarning("Invalid Input", "The values you entered were invalid; using default values instead")
+            size_x = DEFAULT_SIZE
+            size_y = DEFAULT_SIZE
+        try:
+            self.aircraft.init_random_aisle_first(size_x, size_y)
+        except:
+            print("Failed to initialise from file")
+        self.aircraft.initialise_logger()
+        self.size_x = self.aircraft.get_size_x()
+        self.size_y = self.aircraft.get_size_y()
+        
+        self.interactiveFrame.destroy()
+
+        self.initInteractive()
+    
+    def initialiseFromWindowFirst(self):
+        self.running = True
+        try:
+            size_x = int(self.sizeXEntry.get())
+            size_y = int(self.sizeYEntry.get())
+        except:
+            tk.messagebox.showwarning("Invalid Input", "The values you entered were invalid; using default values instead")
+            size_x = DEFAULT_SIZE
+            size_y = DEFAULT_SIZE
+        try:
+            self.aircraft.init_random_window_first(size_x, size_y)
+        except:
+            print("Failed to initialise from file")
+        self.aircraft.initialise_logger()
+        self.size_x = self.aircraft.get_size_x()
+        self.size_y = self.aircraft.get_size_y()
+        
+        self.interactiveFrame.destroy()
+
+        self.initInteractive()
+
 
 
     def initInteractive(self):
@@ -245,7 +295,7 @@ class Application(tk.Frame):
             self.drawLayout()
             self.drawPassengers()
             self.stepsTaken += 1
-            self.strStepsTaken.set(str(self.stepsTaken))
+            self.strStepsTaken.set("Steps: " + str(self.stepsTaken))
             if self.running == True:
                 # self.canvas.after(500, self.canvasUpdate)
                 self.canvas.after(self.updateDelay, self.canvasUpdate)
