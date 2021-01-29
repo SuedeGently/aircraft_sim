@@ -6,6 +6,8 @@ use simple_logger::SimpleLogger;
 use tile::{Tile, Variant, SimpleTile};
 use person::{Person, Behaviour};
 
+const MAX_ITERATIONS: u16 = 1000;
+
 pub struct Aircraft {
     size: (u16, u16),
     layout: Vec<Vec<Tile>>,
@@ -254,6 +256,19 @@ impl Aircraft {
             }
         }
         self.reset();
+    }
+
+    pub fn run_to_completion(&mut self) -> Result<u16, &'static str> {
+        let mut iterations = 0;
+        while !self.is_complete() && iterations < MAX_ITERATIONS {
+            self.update();
+            iterations += 1;
+        }
+        if self.is_complete() {
+            return Ok(iterations);
+        } else {
+            return Err(&"Test");
+        }
     }
 
     pub fn is_complete(&self) -> bool {

@@ -33,7 +33,7 @@ class Application(tk.Frame):
         self.interButton = tk.Button(self.mainFrame,
                                      text="Interactive mode",
                                      command=self.startInteractiveMenu)
-        self.massButton = tk.Button(self.mainFrame,text="Mass Mode",command=self.startMass)
+        self.massButton = tk.Button(self.mainFrame,text="Mass Mode",command=self.startMassMenu)
 
         ## INTERACTIVE MODE MENU ##=============================================
         self.interactiveFrame = tk.Frame(self.master)
@@ -50,6 +50,19 @@ class Application(tk.Frame):
         self.aisleFirstButton = tk.Button(self.interactiveFrame,text="Random Aisle First",command=self.initialiseFromAisleFirst)
         self.windowFirstButton = tk.Button(self.interactiveFrame,text="Random Window First",command=self.initialiseFromWindowFirst)
         self.randomButton = tk.Button(self.interactiveFrame,text="Random Boarding",command=self.initialiseFromRandom)
+        
+        ## MASS MODE MENU ##====================================================
+        self.massFrame = tk.Frame(self.master)
+        
+        self.massLabelsFrame = tk.Frame(self.massFrame)
+        self.layoutsLabel = tk.Label(self.massLabelsFrame,text="Layout Files:")
+        self.passengersLabel = tk.Label(self.massLabelsFrame,text="Passenger Lists:")
+        
+        self.textsFrame = tk.Frame(self.massFrame)
+        self.layoutsText = tk.Text(self.textsFrame, width=40)
+        self.passengersText = tk.Text(self.textsFrame,width=40)
+
+        self.initMassButton = tk.Button(self.massFrame,text="Run Simulations",command=self.initMass)
 
         ### FROM FILE MENU ###==================================================
         self.fileFrame = tk.Frame(self.master)
@@ -72,6 +85,15 @@ class Application(tk.Frame):
 
         # self.startInteractiveMenu()
 
+
+
+        ### MASS OUTPUT ###=====================================================
+
+        self.massOutFrame = tk.Frame(self.master)
+        self.massOut = tk.Text(self.massOutFrame,width=100,bg="grey",fg="white")
+        
+        #=======================================================================
+        
         self.master = master
 
     def startInteractiveMenu(self):
@@ -90,13 +112,16 @@ class Application(tk.Frame):
         self.windowFirstButton.pack()
         self.randomButton.pack()
 
-        # self.layoutFrame.pack()
-        # self.layoutLabel.pack(side=tk.LEFT)
-        # self.layoutEntry.pack()
-        # self.passengerFrame.pack()
-        # self.passengerLabel.pack(side=tk.LEFT)
-        # self.passengerEntry.pack()
-        # self.layoutConfirm.pack()
+    def startMassMenu(self):
+        self.mainFrame.destroy()
+        self.massFrame.pack()
+        self.massLabelsFrame.pack()
+        self.layoutsLabel.pack(side=tk.LEFT,padx=50)
+        self.passengersLabel.pack(padx=50)
+        self.textsFrame.pack()
+        self.layoutsText.pack(side=tk.LEFT)
+        self.passengersText.pack()
+        self.initMassButton.pack()
 
     def interactiveFromFile(self):
         self.interactiveFrame.destroy()
@@ -277,6 +302,19 @@ class Application(tk.Frame):
         print("Packed widgets")
 
         self.canvasUpdate()
+
+    def initMass(self):
+        layouts = self.layoutsText.get("1.0","end-1c").splitlines()
+        passengers = self.passengersText.get("1.0","end-1c").splitlines()
+        self.massFrame.destroy()
+        self.massOutFrame.pack()
+        self.massOut.pack()
+
+        results = aircraft_sim.mass_sim(layouts,passengers)
+        for i in range(len(results)):
+            data = str(i) + " - " + layouts[i] + ": " + str(results[i]) + "\n"
+            self.massOut.insert(tk.END, data)
+        self.massOut.config(state=tk.DISABLED)
 
     def clearCanvas(self):
         self.canvas.delete("all")

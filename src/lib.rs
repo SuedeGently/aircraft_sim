@@ -7,6 +7,7 @@ use pyo3::create_exception;
 use pyo3::exceptions::{PyException, PyTypeError};
 
 use std::path::Path;
+use std::thread;
 
 use simple_logger::SimpleLogger;
 
@@ -215,7 +216,6 @@ impl PyAircraft {
         return values;
     }
 
-
     fn update(&mut self) -> PyResult<bool> {
         // TODO: FIX THIS
         self.aircraft.as_mut().unwrap().update();
@@ -243,10 +243,50 @@ impl PyAircraft {
     }
 }
 
+#[pyfunction]
+fn mass_sim(layouts: Vec<&str>, passenger_lists: Vec<&str>) -> PyResult<Vec<u16>> {
+    if layouts.len() != passenger_lists.len() {
+        return Err(PyTypeError::new_err("Error3"));
+    }
+
+    let mut results = Vec::<u16>::new();
+    let mut jobs: Vec<thread::JoinHandle<Result<u16, &'static str>>> = Vec::new();
+
+    for i in 0..layouts.len() {
+        let aircraft = read_layout(Path::new(layouts.get(i).unwrap()));
+        let passengers = read_passengers(Path::new(passenger_lists.get(i).unwrap()));
+        
+        if aircraft.is_some() && passengers.is_some() {
+            let mut aircraft = aircraft.unwrap();
+            for i in passengers.unwrap() {
+                aircraft.add_passenger(i);
+            }
+            jobs.push(thread::spawn(move || {
+                aircraft.run_to_completion()
+            }));
+        }
+    }
+
+    for i in jobs {
+        match i.join() {
+            Ok(x) => {
+                match x {
+                    Ok(x) => results.push(x),
+                    Err(e) => log::error!("Simulation failed: {}", e)
+                }
+            },
+            Err(e) => log::error!("Simulation failed: {:?}", e),
+        }
+    }
+    
+    return Ok(results);
+}
+
 #[pymodule]
 fn aircraft_sim(py: Python, m: &PyModule) -> PyResult<()> {
     m.add("CustomError", py.get_type::<CustomError>())?;
     m.add_class::<PyAircraft>()?;
+    m.add_function(wrap_pyfunction!(mass_sim, m)?)?;
 
     Ok(())
 }
