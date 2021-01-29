@@ -158,6 +158,35 @@ pub fn random_aisle_first(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'sta
     Ok(persons)
 }
 
+pub fn random(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'static str> {
+    log::info!("Generating random aisle-first boarding pattern");
+    // size_y MUST be odd
+    let mut persons = Vec::<Person>::new();
+    let aisle: u16 = size_x / 2;
+    let mut coords: Vec<(u16,u16)> = Vec::new();
+
+    for x in 0..size_x {
+        if x != aisle {
+            for y in 0..size_y {
+                coords.push((x,y));
+            }
+        }
+    }
+
+    coords.shuffle(&mut thread_rng());
+
+    for i in coords {
+        let mut person = Person::new("DEFAULT");
+        
+        person.target_seat(i.0, i.1);
+        person.set_baggage(true);
+        
+        persons.push(person);
+    }
+
+    Ok(persons)
+}
+
 pub fn read_passengers(path: &Path) -> Option<Vec<Person>> {
     let mut persons = Vec::<Person>::new();
     let file = File::open(path).expect("Invalid file path");

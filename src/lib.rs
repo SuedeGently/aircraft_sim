@@ -151,6 +151,27 @@ impl PyAircraft {
             Err(PyTypeError::new_err("Error3"))
         }
     }
+
+    fn init_random(&mut self, size_x: u16, size_y: u16) -> PyResult<()> {
+        if self.aircraft.is_none() {
+            let new_aircraft = standard_layout(size_x, size_y);
+            let passengers = random(size_x, size_y);
+
+            if passengers.is_ok() && new_aircraft.is_ok() {
+                let mut new_aircraft = new_aircraft.unwrap();
+                for i in passengers.unwrap() {
+                    new_aircraft.add_passenger(i);
+                }
+                self.aircraft = Some(new_aircraft);
+                self.size = (size_x,size_y);
+                Ok(())
+            } else {
+                Err(PyTypeError::new_err("Error3"))
+            }
+        } else {
+            Err(PyTypeError::new_err("Error3"))
+        }
+    }
     
     fn get_values(&mut self) -> PyResult<Vec<Vec<u8>>> {
         if self.aircraft.is_some() {
