@@ -8,14 +8,19 @@ edition = "2018"
 
 [lib]
 name = "aircraft_sim"
-# path = "src/lib.rs"
+path = "src/lib.rs"
 crate-type = ["cdylib"]
+
+[[bin]]
+name = "aircraft_sim"
+path = "./src/bin.rs"
 
 [dependencies]
 log = "0.4"
 simple_logger = "1.11.0"
 csv = "1.1"
 rand = "0.8.3"
+clap = "2.33.0"
 
 [dependencies.pyo3]
 version = "0.12.4"

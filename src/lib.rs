@@ -60,7 +60,7 @@ impl PyAircraft {
     #[staticmethod]
     fn initialise_logger() -> PyResult<()> {
         SimpleLogger::new().init().expect("Failed to initialise logger");
-        log::info!("Initialised logging");
+        log::info!("Initialised logger");
 
         Ok(())
     }
