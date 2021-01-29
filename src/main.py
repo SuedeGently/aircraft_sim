@@ -121,15 +121,16 @@ class Application(tk.Frame):
         self.passengerFile = self.passengerEntry.get()
         try:
             self.aircraft.init_from_file(self.layoutFile, self.passengerFile)
-            self.aircraft.initialise_logger()
-            self.size_x = self.aircraft.get_size_x()
-            self.size_y = self.aircraft.get_size_y()
-            
-            self.fileFrame.destroy()
 
-            self.initInteractive()
         except:
             print("Failed to initialise from file")
+        self.aircraft.initialise_logger()
+        self.size_x = self.aircraft.get_size_x()
+        self.size_y = self.aircraft.get_size_y()
+        
+        self.fileFrame.destroy()
+
+        self.initInteractive()
         # self.aircraft = aircraft_sim.PyAircraft("./config/test_layout.csv", "./config/test_passengers.csv") # For debug _ONLY_
 
     def initialiseFromBackFront(self):
