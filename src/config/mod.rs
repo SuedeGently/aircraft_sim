@@ -85,7 +85,7 @@ pub fn random_back_first(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'stat
 }
 
 pub fn random_front_first(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'static str> {
-    log::info!("Generating random back-first boarding pattern");
+    log::info!("Generating random front-first boarding pattern");
     // size_y MUST be odd
     let mut persons = Vec::<Person>::new();
     let aisle: u16 = size_x / 2;
@@ -106,7 +106,57 @@ pub fn random_front_first(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'sta
     Ok(persons)
 }
 
+pub fn random_window_first(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'static str> {
+    log::info!("Generating random aisle-first boarding pattern");
+    // size_y MUST be odd
+    let mut persons = Vec::<Person>::new();
+    let aisle: u16 = size_x / 2;
 
+    for x in 0..aisle {
+        let mut y_coords: Vec<u16> = (0..size_y).collect();
+        y_coords.shuffle(&mut thread_rng());
+        for y in y_coords {
+            let mut person0 = Person::new("DEFAULT");
+            let mut person1 = Person::new("DEFAULT");
+            
+            person0.target_seat((aisle - (x + 1)), y);
+            person0.set_baggage(true);
+            person1.target_seat(aisle + (x + 1), y);
+            person1.set_baggage(true);
+            
+            persons.push(person0);
+            persons.push(person1);
+        }
+    }
+
+    Ok(persons)
+}
+
+pub fn random_aisle_first(size_x: u16, size_y: u16) -> Result<Vec<Person>, &'static str> {
+    log::info!("Generating random aisle-first boarding pattern");
+    // size_y MUST be odd
+    let mut persons = Vec::<Person>::new();
+    let aisle: u16 = size_x / 2;
+
+    for x in 0..aisle {
+        let mut y_coords: Vec<u16> = (0..size_y).collect();
+        y_coords.shuffle(&mut thread_rng());
+        for y in y_coords {
+            let mut person0 = Person::new("DEFAULT");
+            let mut person1 = Person::new("DEFAULT");
+            
+            person0.target_seat(x, y);
+            person0.set_baggage(true);
+            person1.target_seat(size_x - (x + 1), y);
+            person1.set_baggage(true);
+            
+            persons.push(person0);
+            persons.push(person1);
+        }
+    }
+
+    Ok(persons)
+}
 
 pub fn read_passengers(path: &Path) -> Option<Vec<Person>> {
     let mut persons = Vec::<Person>::new();
