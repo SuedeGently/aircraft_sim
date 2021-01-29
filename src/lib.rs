@@ -1,3 +1,8 @@
+//! This file defines the necessary functions and structures for pyo3 to build a
+//! Python library that can access compiled Rust. These are essentially wrappers
+//! around the different modules written for this project, providing
+//! functionality to the basic Python GUI.
+
 mod aircraft;
 mod config;
 
@@ -12,7 +17,6 @@ use std::thread;
 use simple_logger::SimpleLogger;
 
 use aircraft::Aircraft;
-use aircraft::person::Person;
 use aircraft::tile::Variant;
 use config::*;
 
