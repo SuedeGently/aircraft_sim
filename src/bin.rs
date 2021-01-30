@@ -5,6 +5,7 @@ mod aircraft;
 
 use clap::{App, Arg};
 use std::path::Path;
+use simple_logger::SimpleLogger;
 
 use config::{read_layout, read_passengers};
 
