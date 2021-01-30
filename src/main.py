@@ -71,8 +71,13 @@ class Application(tk.Frame):
         self.massButton.pack()
 
         # self.startInteractiveMenu()
+        
+        self.bind('Control-v', self.paste)
 
         self.master = master
+
+    def paste(self, event):
+        print("Worked!")
 
     def startInteractiveMenu(self):
         self.mainFrame.destroy()
