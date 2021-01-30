@@ -1,9 +1,13 @@
+//! Holds structures, methods, and functions required for dealing with `Tile`s.
+
 use std::fmt;
 use super::person::Person;
 
 const PASS_WAIT: u8 = 2; // The amount of additional steps taken when moving
                          // past an occupied seat
 
+/// An enum representing the various possible types of tile that an `Aircraft`
+/// may contain.
 #[derive(PartialEq, Debug, Clone, Copy)]
 pub enum Variant {
     Aisle,
@@ -12,6 +16,10 @@ pub enum Variant {
     None,
 }
 
+/// A single tile
+///
+/// Must have a `variant`, may hold one or two passengers. Two passengers are
+/// only held when another passenger is making their way past on an aisle.
 pub struct Tile {
     pub(crate) variant: Variant,
     occupier: Option<Person>,
@@ -21,6 +29,7 @@ pub struct Tile {
 }
 
 impl Tile {
+    /// Constructor with `variant` of `Aisle`.
     pub(crate) fn aisle() -> Tile {
         Tile {
             variant: Variant::Aisle,
@@ -31,6 +40,7 @@ impl Tile {
         }
     }
 
+    /// Constructor with `variant` of `Seat`.
     pub fn seat() -> Tile {
         Tile {
             variant: Variant::Seat,
@@ -41,6 +51,7 @@ impl Tile {
         }
     }
 
+    /// Constructor with `variant` of `Entrance`.
     pub fn entrance() -> Tile {
         Tile {
             variant: Variant::Entrance,
@@ -51,6 +62,7 @@ impl Tile {
         }
     }
 
+    /// Constructor with `variant` of `None`.
     pub fn none() -> Tile {
         Tile {
             variant: Variant::None,
@@ -61,15 +73,21 @@ impl Tile {
         }
     }
 
+    /// Places a passenger into this tile.
     pub fn occupy(&mut self, p: Person) {
+        if self.is_occupied() {
+            log::warn!("A passenger is being displaced");
+        }
         self.occupier = Some(p);
         self.updated = true;
     }
 
+    /// Allows a second passenger to temporarily occupy this space.
     pub fn pass_in(&mut self, p: Person) {
         self.allowing = Some(p);
     }
 
+    /// Removes the second passenger occupying this space.
     pub fn pass_out(&mut self) -> Person {
         let person = self.allowing.take();
         return person.unwrap();
@@ -89,6 +107,7 @@ impl Tile {
         }
     }
 
+    /// Checks whether second occupant has been delayed enough to pass onwards.
     pub fn pass_count(&mut self) -> bool {
         if self.pass_counter >= PASS_WAIT {
             self.pass_counter = 0;
@@ -126,48 +145,27 @@ impl Tile {
     pub fn set_updated(&mut self, t: bool) {
         self.updated = t;
     }
-
+    
+    /// Removes this tile's occupant ready to move to another tile.
     pub fn free(&mut self) -> Option<Person> {
         let person = self.occupier.take();
+
         if self.allowing.is_some() {
             let passer = self.pass_out();
             self.occupier = Some(passer);
         }
+
         return person;
     }
 }
 
+/// Defines how this Tile should be formatted if it's passed to a standard
+/// library macro like `println!()`.
 impl fmt::Debug for Tile {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Tile")
             .field("variant", &self.variant)
             .finish()
-    }
-}
-
-#[derive(Clone, Copy)]
-pub struct SimpleTile {
-    variant: Variant,
-    occupied: bool,
-}
-
-impl SimpleTile {
-    pub fn new(t: &Tile) -> SimpleTile {
-        SimpleTile {
-            variant: t.get_variant(),
-            occupied: t.is_occupied(),
-        }
-    }
-
-    pub fn empty() -> SimpleTile {
-        SimpleTile {
-            variant: Variant::None,
-            occupied: false,
-        }
-    }
-
-    pub fn get_variant(&self) -> Variant {
-        return self.variant;
     }
 }
 
