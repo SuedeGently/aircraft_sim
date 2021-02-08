@@ -368,7 +368,7 @@ impl Aircraft {
         if self.is_complete() {
             return Ok(iterations);
         } else {
-            return Err(&"Test");
+            return Err(&"Passengers could not all be seated.");
         }
     }
     
@@ -388,7 +388,7 @@ impl Aircraft {
     ///
     /// This is called at the end of `update()` to ensure no incorrect
     /// behaviours are observed on the next iteration.
-    pub fn reset(&mut self) {
+    fn reset(&mut self) {
         for i in 0..self.size.0 as usize {
             for j in 0..self.size.1 as usize {
                 self.layout[i][j].set_updated(false);

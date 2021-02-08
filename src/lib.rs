@@ -459,6 +459,58 @@ fn aircraft_sim(py: Python, m: &PyModule) -> PyResult<()> {
     Ok(())
 }
 
+
+fn core_mass_sim(layouts:Vec<&str>,passenger_lists:Vec<&str>) -> Result<Vec<u16>, &'static str> {
+    // If a different number of files are passed in for each argument, the input
+    // is invalid.
+    if layouts.len() != passenger_lists.len() {
+        return Err("Invalid input lengths");
+    }
+
+    let mut results = Vec::<u16>::new();
+
+    // This vector holds the handles for each thread, allowing them to be joined
+    // after completion.
+    let mut jobs:Vec<thread::JoinHandle<Result<u16,&'static str>>> = Vec::new();
+
+    for i in 0..layouts.len() {
+        let aircraft = read_layout(Path::new(layouts.get(i).unwrap()));
+        let passengers = read_passengers(Path::new(passenger_lists
+                                                   .get(i)
+                                                   .unwrap()));
+        
+        if aircraft.is_some() && passengers.is_some() {
+            let mut aircraft = aircraft.unwrap();
+            for i in passengers.unwrap() {
+                aircraft.add_passenger(i);
+            }
+
+            // A new thread for each aircraft simulation is created.
+            jobs.push(thread::spawn(move || {
+                aircraft.run_to_completion()
+            }));
+        }
+    }
+    
+    // All threads are joined here; errors are logged and a 0 value returned.
+    for i in jobs {
+        match i.join() {
+            Ok(x) => {
+                match x {
+                    Ok(x) => results.push(x),
+                    Err(e) => {
+                        log::error!("Simulation failed: {}", e);
+                        results.push(0);
+                    },
+                }
+            },
+            Err(e) => log::error!("Simulation failed: {:?}", e),
+        }
+    }
+    
+    return Ok(results);
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -489,5 +541,18 @@ mod tests {
 
         assert!(aircraft.check_if_occupied(0,0));
         assert!(aircraft.check_if_occupied(4,4));
+    }
+
+    #[test]
+    fn mass_simulation() {
+        let mut passenger_lists = Vec::<&str>::new();
+        passenger_lists.push("./config/steffen.csv");
+        passenger_lists.push("./config/block1.csv");
+
+        let mut layouts = Vec::<&str>::new();
+        layouts.push("./config/standard_layout.csv");
+        layouts.push("./config/standard_layout.csv");
+
+        assert!(core_mass_sim(layouts, passenger_lists).is_ok());
     }
 }
