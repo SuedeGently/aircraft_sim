@@ -15,6 +15,7 @@ use std::path::Path;
 use std::thread;
 
 use simple_logger::SimpleLogger;
+use log::LevelFilter;
 
 use aircraft::Aircraft;
 use aircraft::tile::Variant;
@@ -59,7 +60,7 @@ impl PyAircraft {
     /// not be output. This can be modified to change the displayed log level.
     #[staticmethod]
     fn initialise_logger() -> PyResult<()> {
-        SimpleLogger::new().init().expect("Failed to initialise logger");
+        SimpleLogger::new().with_level(LevelFilter::Warn).init().expect("Failed to initialise logger");
         log::info!("Initialised logger");
 
         Ok(())

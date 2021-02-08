@@ -5,6 +5,7 @@
 # The two supported modes, interactive and mass simulation, both rely on Rust
 # functions in `/src/lib.rs`.
 
+import os.path
 import aircraft_sim
 import tkinter as tk
 from tkinter import messagebox
@@ -120,7 +121,6 @@ class Application(tk.Frame):
         self.massOut = tk.Text(self.massOutFrame,width=100,bg="grey",fg="white")
         
         #=======================================================================
-        
         self.master = master
 
     # Displays the menu for interactive mode
@@ -182,16 +182,17 @@ class Application(tk.Frame):
         self.passengerFile = self.passengerEntry.get()
         try:
             self.aircraft.init_from_file(self.layoutFile, self.passengerFile)
+            self.aircraft.initialise_logger()
+            self.size_x = self.aircraft.get_size_x()
+            self.size_y = self.aircraft.get_size_y()
+            
+            self.fileFrame.destroy()
+
+            self.initInteractive()
 
         except:
-            print("Failed to initialise from file")
-        self.aircraft.initialise_logger()
-        self.size_x = self.aircraft.get_size_x()
-        self.size_y = self.aircraft.get_size_y()
-        
-        self.fileFrame.destroy()
+            tk.messagebox.showerror("Invalid Input", "These files could not be located")
 
-        self.initInteractive()
 
     # Initialises an interactive PyAircraft using a random back-to-front
     # boarding pattern.
@@ -210,7 +211,8 @@ class Application(tk.Frame):
         try:
             self.aircraft.init_random_back_front(size_x, size_y)
         except:
-            print("Failed to initialise from file")
+            tk.messagebox.showerror("Unknown Error",
+                                    "Could not initialise")
         self.aircraft.initialise_logger()
         self.size_x = self.aircraft.get_size_x()
         self.size_y = self.aircraft.get_size_y()
@@ -235,7 +237,8 @@ class Application(tk.Frame):
         try:
             self.aircraft.init_random_front_back(size_x, size_y)
         except:
-            print("Failed to initialise from file")
+            tk.messagebox.showerror("Unknown Error",
+                                    "Could not initialise")
         self.aircraft.initialise_logger()
         self.size_x = self.aircraft.get_size_x()
         self.size_y = self.aircraft.get_size_y()
@@ -260,7 +263,8 @@ class Application(tk.Frame):
         try:
             self.aircraft.init_random_aisle_first(size_x, size_y)
         except:
-            print("Failed to initialise from file")
+            tk.messagebox.showerror("Unknown Error",
+                                    "Could not initialise")
         self.aircraft.initialise_logger()
         self.size_x = self.aircraft.get_size_x()
         self.size_y = self.aircraft.get_size_y()
@@ -285,7 +289,8 @@ class Application(tk.Frame):
         try:
             self.aircraft.init_random_window_first(size_x, size_y)
         except:
-            print("Failed to initialise from file")
+            tk.messagebox.showerror("Unknown Error",
+                                    "Could not initialise")
         self.aircraft.initialise_logger()
         self.size_x = self.aircraft.get_size_x()
         self.size_y = self.aircraft.get_size_y()
@@ -309,7 +314,8 @@ class Application(tk.Frame):
         try:
             self.aircraft.init_random(size_x, size_y)
         except:
-            print("Failed to initialise from file")
+            tk.messagebox.showerror("Unknown Error",
+                                    "Could not initialise")
         self.aircraft.initialise_logger()
         self.size_x = self.aircraft.get_size_x()
         self.size_y = self.aircraft.get_size_y()
@@ -326,15 +332,12 @@ class Application(tk.Frame):
                                 height=(self.size_y*25))
 
         self.controlWidget = tk.Frame(self.master)
-        print("controlWidget")
 
 
         self.pauseButton = tk.Button(self.controlWidget,
                                      text="Start/Stop",
                                      command=self.toggle)
-        print("pauseButton")
         self.pauseIndicator = tk.Label(self.master,textvariable=self.pStatus)
-        print("pauseIndicator")
         self.stepIndicator = tk.Label(self.master,
                                       textvariable=self.strStepsTaken)
         self.speedUpButton = tk.Button(self.controlWidget,
@@ -344,7 +347,6 @@ class Application(tk.Frame):
                                          text="<<",
                                          command=self.increaseDelay)
 
-        print("Created widgets")
 
         self.canvas.pack()
         self.pauseIndicator.pack()
@@ -354,7 +356,6 @@ class Application(tk.Frame):
         self.speedUpButton.pack()
         self.stepIndicator.pack()
 
-        print("Packed widgets")
 
         self.canvasUpdate()
     
@@ -423,7 +424,6 @@ class Application(tk.Frame):
     # counter, and checks if the user has paused. If not, this function
     # recursively schedules itself.
     def canvasUpdate(self):
-        print("Running:", self.running)
         if not self.aircraft.update():
             self.clearCanvas()
             self.drawLayout()
@@ -438,7 +438,6 @@ class Application(tk.Frame):
             self.clearCanvas()
             self.drawLayout()
             self.drawPassengers()
-            print("Done.")
 
     # Increases the delay between updates, effectively slowing the simulation.
     def increaseDelay(self):
@@ -446,7 +445,6 @@ class Application(tk.Frame):
             self.updateDelay += 100
         else:
             self.updateDelay = 750
-        print(self.updateDelay)
     
     # Decreases the delay between updates, effectively speeding up the
     # simulation.
@@ -455,11 +453,11 @@ class Application(tk.Frame):
             self.updateDelay -= 100
         else:
             self.updateDelay = 150
-        print(self.updateDelay)
 
 
 # GUI is instantiated and the mainloop started with the mainmenu being rendered
 # first by default.
 master = tk.Tk()
+master.resizable(0,0)
 app = Application(master=master)
 app.mainloop()
